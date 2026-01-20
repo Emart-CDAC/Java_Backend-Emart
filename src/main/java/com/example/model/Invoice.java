@@ -26,9 +26,9 @@ public class Invoice {
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
-    private BigDecimal discountAmount;
-    private BigDecimal taxAmount;
-    private BigDecimal totalAmount;
+    private double  discountAmount;
+    private double taxAmount;
+    private double totalAmount;
 
     @Enumerated(EnumType.STRING)
     private DeliveryType deliveryType;
@@ -69,22 +69,22 @@ public class Invoice {
 	public void setPaymentMethod(PaymentMethod paymentMethod) {
 		this.paymentMethod = paymentMethod;
 	}
-	public BigDecimal getDiscountAmount() {
+	public double getDiscountAmount() {
 		return discountAmount;
 	}
-	public void setDiscountAmount(BigDecimal discountAmount) {
+	public void setDiscountAmount(double discountAmount) {
 		this.discountAmount = discountAmount;
 	}
-	public BigDecimal getTaxAmount() {
+	public double getTaxAmount() {
 		return taxAmount;
 	}
-	public void setTaxAmount(BigDecimal taxAmount) {
+	public void setTaxAmount(double taxAmount) {
 		this.taxAmount = taxAmount;
 	}
-	public BigDecimal getTotalAmount() {
+	public double getTotalAmount() {
 		return totalAmount;
 	}
-	public void setTotalAmount(BigDecimal totalAmount) {
+	public void setTotalAmount(double totalAmount) {
 		this.totalAmount = totalAmount;
 	}
 	public DeliveryType getDeliveryType() {

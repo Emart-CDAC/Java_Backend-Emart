@@ -17,7 +17,7 @@ public class Cart {
     private Customer customer;
 
     @Column(name = "Total_Amount")
-    private BigDecimal totalAmount;
+    private double totalAmount;
 
 	public int getCartId() {
 		return cartId;
@@ -35,11 +35,11 @@ public class Cart {
 		this.customer = customer;
 	}
 
-	public BigDecimal getTotalAmount() {
+	public double getTotalAmount() {
 		return totalAmount;
 	}
 
-	public void setTotalAmount(BigDecimal totalAmount) {
+	public void setTotalAmount(double totalAmount) {
 		this.totalAmount = totalAmount;
 	}
 

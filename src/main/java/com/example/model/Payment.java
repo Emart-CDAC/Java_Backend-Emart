@@ -21,7 +21,7 @@ public class Payment {
     private LocalDateTime paymentDate;
 
     @Column(name = "Amount")
-    private BigDecimal amount;
+    private double amount;
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
@@ -50,11 +50,11 @@ public class Payment {
 		this.paymentDate = paymentDate;
 	}
 
-	public BigDecimal getAmount() {
+	public double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(BigDecimal amount) {
+	public void setAmount(double amount) {
 		this.amount = amount;
 	}
 

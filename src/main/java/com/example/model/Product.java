@@ -27,10 +27,10 @@ public class Product {
     private Store store;
 
     @Column(name = "normal_price", nullable = false)
-    private BigDecimal normalPrice;
+    private double normalPrice;
 
     @Column(name = "ecard_price")
-    private BigDecimal ecardPrice;
+    private double ecardPrice;
 
     @Column(name = "available_quantity")
     private int availableQuantity;
@@ -78,19 +78,19 @@ public class Product {
 		this.store = store;
 	}
 
-	public BigDecimal getNormalPrice() {
+	public double getNormalPrice() {
 		return normalPrice;
 	}
 
-	public void setNormalPrice(BigDecimal normalPrice) {
+	public void setNormalPrice(double normalPrice) {
 		this.normalPrice = normalPrice;
 	}
 
-	public BigDecimal getEcardPrice() {
+	public double getEcardPrice() {
 		return ecardPrice;
 	}
 
-	public void setEcardPrice(BigDecimal ecardPrice) {
+	public void setEcardPrice(double ecardPrice) {
 		this.ecardPrice = ecardPrice;
 	}
 
