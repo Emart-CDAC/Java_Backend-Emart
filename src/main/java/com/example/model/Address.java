@@ -10,6 +10,9 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Address_Id")
     private int addressId;
+    @ManyToOne
+    @JoinColumn(name = "User_id")
+    private Customer customer;
 
     @Column(name = "Town", nullable = false)
     private String town;
@@ -95,6 +98,14 @@ public class Address {
 	public void setHouseNumber(String houseNumber) {
 		this.houseNumber = houseNumber;
 	}
+	public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
 
     
+
 }
