@@ -24,7 +24,7 @@ public class Invoice
 	private int invoice_id;
 	
 	@OneToOne
-	private Order order;
+	private Orders order;
 	
 	@OneToOne
 	private Customer customer;
@@ -64,11 +64,11 @@ public class Invoice
 		this.invoice_id = invoice_id;
 	}
 
-	public Order getOrder() {
+	public Orders getOrder() {
 		return order;
 	}
 
-	public void setOrder(Order order) {
+	public void setOrder(Orders order) {
 		this.order = order;
 	}
 
