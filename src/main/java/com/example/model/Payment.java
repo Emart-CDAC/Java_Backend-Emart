@@ -1,64 +1,70 @@
 package com.example.model;
 
-import java.time.LocalDateTime;
 import jakarta.persistence.*;
-
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "Payment")
 public class Payment {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int Payment_id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Payment_id")
+    private int paymentId;
 
-	private int Order_id;
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Orders order;
 
-	private LocalDateTime Payment_date;
+    @Column(name = "Payment_date")
+    private LocalDateTime paymentDate;
 
-	@Column(name="Amount", precision=10, scale=2)
-	private double Amount;
+    @Column(name = "Amount")
+    private BigDecimal amount;
 
-	@Enumerated(EnumType.STRING)
-	private PaymentStatus Status;
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
 
-	public int getPayment_id() {
-		return Payment_id;
+	public int getPaymentId() {
+		return paymentId;
 	}
 
-	public void setPayment_id(int payment_id) {
-		Payment_id = payment_id;
-	}
-	
-	public int getOrder_id() {
-		return Order_id;
+	public void setPaymentId(int paymentId) {
+		this.paymentId = paymentId;
 	}
 
-	public void setOrder_id(int Order_id) {
-		this.Order_id = Order_id;
+	public Orders getOrder() {
+		return order;
 	}
 
-	public LocalDateTime getPayment_date() {
-		return Payment_date;
+	public void setOrder(Orders order) {
+		this.order = order;
 	}
 
-	public void setPayment_date(LocalDateTime Payment_date) {
-		this.Payment_date = Payment_date;
+	public LocalDateTime getPaymentDate() {
+		return paymentDate;
 	}
 
-	public double getAmount() {
-		return Amount;
+	public void setPaymentDate(LocalDateTime paymentDate) {
+		this.paymentDate = paymentDate;
 	}
 
-	public void setAmount(double Amount) {
-		this.Amount = Amount;
+	public BigDecimal getAmount() {
+		return amount;
+	}
+
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
 	}
 
 	public PaymentStatus getStatus() {
-		return Status;
+		return status;
 	}
 
-	public void setStatus(PaymentStatus Status) {
-		this.Status = Status;
+	public void setStatus(PaymentStatus status) {
+		this.status = status;
 	}
 
+   
 }
