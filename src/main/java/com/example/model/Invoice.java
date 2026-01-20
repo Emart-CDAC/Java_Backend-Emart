@@ -12,9 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 
 
-enum PaymentMethod {
-    CASH, UPI, CARD, NETBANKING
-}
+
 
 @Entity
 public class Invoice 
