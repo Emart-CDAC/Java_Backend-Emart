@@ -19,7 +19,7 @@ public class EmartCard {
     private String occupation;
 
     @Column(name = "Annual_Income", nullable = false)
-    private BigDecimal annualIncome;
+    private double annualIncome;
 
     @Column(name = "Pan_Card", nullable = false)
     private String panCard;
@@ -51,11 +51,11 @@ public class EmartCard {
 		this.occupation = occupation;
 	}
 
-	public BigDecimal getAnnualIncome() {
+	public double getAnnualIncome() {
 		return annualIncome;
 	}
 
-	public void setAnnualIncome(BigDecimal annualIncome) {
+	public void setAnnualIncome(double annualIncome) {
 		this.annualIncome = annualIncome;
 	}
 
