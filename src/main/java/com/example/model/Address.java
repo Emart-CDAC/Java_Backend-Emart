@@ -11,19 +11,19 @@ public class Address {
     @Column(name = "Address_Id")
     private int addressId;
 
-    @Column(name = "Town")
+    @Column(name = "Town", nullable = false)
     private String town;
 
-    @Column(name = "State")
+    @Column(name = "State", nullable = false)
     private String state;
 
-    @Column(name = "Country")
+    @Column(name = "Country", nullable = false)
     private String country;
 
-    @Column(name = "City")
+    @Column(name = "City", nullable = false)
     private String city;
 
-    @Column(name = "Pincode")
+    @Column(name = "Pincode", nullable = false)
     private String pincode;
 
     @Column(name = "Landmark")
@@ -32,30 +32,69 @@ public class Address {
     @Column(name = "HouseNumber")
     private String houseNumber;
 
-    public Address() {}
+	public int getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(int addressId) {
+		this.addressId = addressId;
+	}
+
+	public String getTown() {
+		return town;
+	}
+
+	public void setTown(String town) {
+		this.town = town;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getPincode() {
+		return pincode;
+	}
+
+	public void setPincode(String pincode) {
+		this.pincode = pincode;
+	}
+
+	public String getLandmark() {
+		return landmark;
+	}
+
+	public void setLandmark(String landmark) {
+		this.landmark = landmark;
+	}
+
+	public String getHouseNumber() {
+		return houseNumber;
+	}
+
+	public void setHouseNumber(String houseNumber) {
+		this.houseNumber = houseNumber;
+	}
 
     
-    public int getAddressId() { return addressId; }
-    public void setAddressId(int addressId) { this.addressId = addressId; }
-
-    public String getTown() { return town; }
-    public void setTown(String town) { this.town = town; }
-
-    public String getState() { return state; }
-    public void setState(String state) { this.state = state; }
-
-    public String getCountry() { return country; }
-    public void setCountry(String country) { this.country = country; }
-
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
-
-    public String getPincode() { return pincode; }
-    public void setPincode(String pincode) { this.pincode = pincode; }
-
-    public String getLandmark() { return landmark; }
-    public void setLandmark(String landmark) { this.landmark = landmark; }
-
-    public String getHouseNumber() { return houseNumber; }
-    public void setHouseNumber(String houseNumber) { this.houseNumber = houseNumber; }
 }
