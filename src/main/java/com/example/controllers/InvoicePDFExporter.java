@@ -83,7 +83,7 @@ public class InvoicePDFExporter {
 
         for (Invoice invo : invoiceList) {
 
-            table.addCell(String.valueOf(invo.getInvoice_id()));
+            table.addCell(String.valueOf(invo.getInvoiceId()));
 
             table.addCell(invo.getOrder() != null
                     ? String.valueOf(invo.getOrder().getOrderId())
@@ -93,46 +93,40 @@ public class InvoicePDFExporter {
                     ? String.valueOf(invo.getCustomer().getUserId())
                     : "N/A");
 
-            table.addCell(invo.getOrder_date() != null
-                    ? invo.getOrder_date().toString()
+            table.addCell(invo.getOrderDate() != null
+                    ? invo.getOrderDate().toString()
                     : "N/A");
 
             table.addCell(invo.getPaymentMethod() != null
                     ? invo.getPaymentMethod().toString()
                     : "N/A");
 
-            table.addCell(invo.getDiscount_amount() != null
-                    ? invo.getDiscount_amount().toString()
-                    : "0.00");
+            table.addCell(String.valueOf(invo.getDiscountAmount()));
 
-            table.addCell(invo.getTax_amount() != null
-                    ? invo.getTax_amount().toString()
-                    : "0.00");
+            table.addCell(String.valueOf(invo.getTaxAmount()));
 
-            table.addCell(invo.getTotal_amount() != null
-                    ? invo.getTotal_amount().toString()
-                    : "0.00");
+            table.addCell(String.valueOf(invo.getTotalAmount()));
 
-            table.addCell(invo.getDelivery_type() != null
-                    ? invo.getDelivery_type().toString()
+            table.addCell(invo.getDeliveryType() != null
+                    ? invo.getDeliveryType().toString()
                     : "N/A");
 
-            table.addCell(invo.getBilling_address() != null
-                    ? invo.getBilling_address()
+            table.addCell(invo.getBillingAddress() != null
+                    ? invo.getBillingAddress()
                     : "N/A");
 
-            table.addCell(invo.getShipping_address() != null
-                    ? invo.getShipping_address()
+            table.addCell(invo.getShippingAddress() != null
+                    ? invo.getShippingAddress()
                     : "N/A");
 
-            table.addCell(String.valueOf(invo.getEpoints_used()));
+            table.addCell(String.valueOf(invo.getEpointsUsed()));
 
-            table.addCell(String.valueOf(invo.getEpoints_balance()));
+            table.addCell(String.valueOf(invo.getEpointsBalance()));
 
-            table.addCell(String.valueOf(invo.getEpoints_earned()));
+            table.addCell(String.valueOf(invo.getEpointsEarned()));
         }
     }
-     
+
     public void export(HttpServletResponse response) throws DocumentException, IOException {
 
         Document document = new Document(PageSize.A4);

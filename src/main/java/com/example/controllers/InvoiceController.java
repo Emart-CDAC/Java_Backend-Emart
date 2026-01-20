@@ -5,6 +5,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class InvoiceController 
 {
 	@Autowired
-	private final InvoiceService invoiceService;
+	private final InvoiceService invoiceService=null;
 	
 	
 	@PostMapping("/generate")
@@ -38,9 +39,9 @@ public class InvoiceController
 	}
 	
 	@GetMapping("/view")
-	public ResponseEntity<Invoice> viewInvoiceById(@PathVariable int invoice_id)
+	public ResponseEntity<Optional<Invoice>> viewInvoiceById(@PathVariable int invoice_id)
 	{
-		Invoice invoice = invoiceService.viewInvoiceById(invoice_id);
+		Optional<Invoice> invoice = invoiceService.findById(invoice_id);
 		return ResponseEntity.ok(invoice);
 	}
 	
