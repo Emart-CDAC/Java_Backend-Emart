@@ -9,5 +9,4 @@ public class EmartCdacApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(EmartCdacApplication.class, args);
 	}
-
 }
