@@ -22,9 +22,10 @@ public class Cart {
 	private int Cart_Id;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "User_Id")
+	@JoinColumn(name = "User_Id")  
 	private Customer customer;
 	
+
 	@Column(name="Total_Amount", precision=10,scale=2)
 	private BigDecimal Total_Amount;
 	
@@ -35,6 +36,14 @@ public class Cart {
 	
 	public void setCartId(int cartId) {
 		this.Cart_Id=cartId;
+	}
+	
+	public Customer getCustomer() {
+		return customer;
+	}
+	
+	public void setCustomer(Customer customer) {
+		this.customer = customer;
 	}
 	
 	

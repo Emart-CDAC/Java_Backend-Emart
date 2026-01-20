@@ -3,11 +3,6 @@ package com.example.model;
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
 
-enum PaymentStatus {
-    PENDING,
-    PAID,
-    FAILED
-}
 
 @Entity
 public class Payment {

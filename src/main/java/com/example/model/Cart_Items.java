@@ -20,8 +20,8 @@ public class Cart_Items {
     @JoinColumn(name = "Cart_Id", nullable = false)
 	private  Cart cart;
 	
-//	@ManyToOne
-//	@JoinColumn(name="Product_Id")  temporary
+	@ManyToOne
+	@JoinColumn(name="Product_Id")  
 	private Product product;
 	
 	private int Quantity;

@@ -12,9 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
-enum DeliveryType {
-    STORE, HOME_DELIVERY
-}
 
 enum PaymentMethod {
     CASH, UPI, CARD, NETBANKING
@@ -28,8 +25,12 @@ public class Invoice
 	private int invoice_id;
 	
 	@OneToOne
+
 	@JoinColumn(name="order_id")
 	private Orders orders;
+
+	private Orders order;
+
 	
 	@OneToOne
 	@JoinColumn(name="user_id")
@@ -70,11 +71,11 @@ public class Invoice
 		this.invoice_id = invoice_id;
 	}
 
-	public Order getOrder() {
+	public Orders getOrder() {
 		return order;
 	}
 
-	public void setOrder(Order order) {
+	public void setOrder(Orders order) {
 		this.order = order;
 	}
 

@@ -35,7 +35,7 @@ public class Customer {
   
     @ManyToOne
     @JoinColumn(name = "CardHolder_id")
-    private EmartCard emartCard;
+    private Emart_Card Emart_Card;
 
     @Column(name = "BirthDate")
     private LocalDate birthDate;
@@ -73,8 +73,8 @@ public class Customer {
     public int getEpoints() { return epoints; }
     public void setEpoints(int epoints) { this.epoints = epoints; }
 
-    public EmartCard getEmartCard() { return emartCard; }
-    public void setEmartCard(EmartCard emartCard) { this.emartCard = emartCard; }
+    public Emart_Card getEmart_Card() { return Emart_Card; }
+    public void setEmart_Card(Emart_Card Emart_Card) { this.Emart_Card = Emart_Card; }
 
     public LocalDate getBirthDate() { return birthDate; }
     public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }

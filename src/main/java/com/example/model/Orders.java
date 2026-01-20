@@ -1,4 +1,4 @@
-package com.example.Model;
+package com.example.model;
 
 import jakarta.persistence.*;
 
@@ -10,16 +10,7 @@ enum OrderStatus {
 	CANCELLED
 }
 
-enum PaymentStatus {
-	PENDING,
-	PAID,
-	FAILED
-}
 
-enum Delivery {
-	STORE,
-	HOME_DELIVERY
-}
 
 @Entity
 public class Orders {
@@ -35,7 +26,7 @@ public class Orders {
 	private PaymentStatus payment_status;
 	
 	@Enumerated(EnumType.STRING)
-	private Delivery delivery_type;
+	private DeliveryType delivery_type;
 	
 	private double total_amount;
 	private int epoints_used;
@@ -117,11 +108,11 @@ public class Orders {
 		this.total_amount = totalAmount;
 	}
 
-	public Delivery getDeliveryType() {
+	public DeliveryType getDeliveryType() {
 		return delivery_type;
 	}
 
-	public void setDeliveryType(Delivery deliveryType) {
+	public void setDeliveryType(DeliveryType deliveryType) {
 		this.delivery_type = deliveryType;
 	}
 
