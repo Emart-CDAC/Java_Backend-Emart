@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
 enum DeliveryType {
@@ -27,9 +28,11 @@ public class Invoice
 	private int invoice_id;
 	
 	@OneToOne
-	private Order order;
+	@JoinColumn(name="order_id")
+	private Orders orders;
 	
 	@OneToOne
+	@JoinColumn(name="user_id")
 	private Customer customer;
 	
 	private Date order_date;
