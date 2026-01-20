@@ -1,5 +1,5 @@
 package com.example.model;
 
-enum PaymentMethod {
+public enum PaymentMethod {
     CASH, UPI, CARD, NETBANKING
 }
