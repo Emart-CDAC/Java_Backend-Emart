@@ -11,9 +11,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 
-enum DeliveryType {
-    STORE, HOME_DELIVERY
-}
 
 enum PaymentMethod {
     CASH, UPI, CARD, NETBANKING
