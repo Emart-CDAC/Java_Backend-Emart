@@ -1,9 +1,14 @@
 package com.example.services;
 
 import com.example.model.Product;
+import com.example.repository.CategoryRepository;
 import com.example.repository.ProductRepository;
+import com.example.repository.SubCategoryRepository;
+import com.example.util.ProductExcelHelper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +18,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+    
+    @Autowired
+    private CategoryRepository categoryRepo;
+
+    @Autowired
+    private SubCategoryRepository subCategoryRepo;
 
     @Override
     public List<Product> getAllProducts() {
@@ -54,5 +65,26 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteProduct(int id) {
         productRepository.deleteById(id);
+    }
+
+	@Override
+	public void uploadProducts(MultipartFile file) {
+
+        if (!ProductExcelHelper.isExcelFile(file)) {
+            throw new RuntimeException("Invalid Excel file");
+        }
+
+        try {
+            List<Product> products = ProductExcelHelper.parseExcel(
+                    file.getInputStream(),
+                    categoryRepo,
+                    subCategoryRepo
+            );
+
+            productRepository.saveAll(products);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }
