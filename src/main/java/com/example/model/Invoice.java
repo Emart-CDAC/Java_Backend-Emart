@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 
@@ -33,8 +34,9 @@ public class Invoice {
     @Column(name = "order_date")
     private LocalDateTime orderDate;
 
-    @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
+    @OneToOne
+    @JoinColumn(name = "order_id", referencedColumnName = "order_id", insertable = false, updatable = false)
+    private Payment payment;
 
     private double  discountAmount;
     private double taxAmount;
@@ -73,11 +75,12 @@ public class Invoice {
 	public void setOrderDate(LocalDateTime orderDate) {
 		this.orderDate = orderDate;
 	}
-	public PaymentMethod getPaymentMethod() {
-		return paymentMethod;
-	}
-	public void setPaymentMethod(PaymentMethod paymentMethod) {
-		this.paymentMethod = paymentMethod;
+	public Payment getPayment() {
+        return payment;
+    }
+	public void setPayment(Payment payment)
+	{
+		this.payment=payment;
 	}
 	public double getDiscountAmount() {
 		return discountAmount;
