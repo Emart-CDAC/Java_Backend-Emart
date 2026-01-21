@@ -28,21 +28,21 @@ import jakarta.servlet.http.HttpServletResponse;
 public class InvoiceController 
 {
 	@Autowired
-	private final InvoiceService invoiceService=null;
+	InvoiceService invoiceService;
 	
 	
-	@PostMapping("/generate")
-	public ResponseEntity<Invoice> generateInvoice(@PathVariable int order_id)
+	@PostMapping("/generate/{orderId}")
+	public ResponseEntity<Invoice> generateInvoice(@PathVariable("orderId") int order_id)
 	{
 		Invoice invoice = invoiceService.addInvoice(order_id);
 		return ResponseEntity.ok(invoice);
 	}
 	
-	@GetMapping("/view")
-	public ResponseEntity<Optional<Invoice>> viewInvoiceById(@PathVariable int invoice_id)
-	{
-		Optional<Invoice> invoice = invoiceService.findById(invoice_id);
-		return ResponseEntity.ok(invoice);
+	@GetMapping("/view/{invoiceId}")
+	public ResponseEntity<Invoice> viewInvoiceById(@PathVariable int invoiceId) {
+	    return invoiceService.findById(invoiceId)
+	            .map(ResponseEntity::ok)
+	            .orElse(ResponseEntity.notFound().build());
 	}
 	
 	@GetMapping("/export/pdf")
@@ -52,7 +52,7 @@ public class InvoiceController
         String currentDateTime = dateFormatter.format(new Date());
          
         String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=Products_" + currentDateTime + ".pdf";
+        String headerValue = "attachment; filename=invoice_" + currentDateTime + ".pdf";
         response.setHeader(headerKey, headerValue);
          
         List<Invoice> invoice = invoiceService.findAll();

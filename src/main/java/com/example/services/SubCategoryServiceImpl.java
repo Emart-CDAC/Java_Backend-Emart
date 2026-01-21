@@ -9,11 +9,13 @@ import com.example.model.SubCategory;
 import com.example.repository.SubCategoryRepository;
 
 @Service
-public class SubCategoryServiceImpl {
-	@Autowired
+public class SubCategoryServiceImpl implements SubCategoryService {
+
+    @Autowired
     private SubCategoryRepository subCategoryRepository;
 
+    @Override
     public List<SubCategory> getSubCategoriesByCategory(int categoryId) {
-        return subCategoryRepository.findByCategoryId(categoryId);
+        return subCategoryRepository.findByCategoryCategoryId(categoryId);
     }
 }

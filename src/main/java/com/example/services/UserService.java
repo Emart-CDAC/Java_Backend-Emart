@@ -6,9 +6,9 @@ public interface UserService {
 
     Customer registerUser(Customer customer);
 
-    Customer getUserById(Long userId);
+    Customer getUserById(int userId);
 
-    Customer updateUser(Long userId, Customer customer);
+    Customer updateUser(int userId, Customer customer);
 
-    String changePassword(Long userId, String oldPassword, String newPassword);
+    String changePassword(int userId, String oldPassword, String newPassword);
 }

@@ -26,7 +26,7 @@ public class CartController
 		
 	}
 	
-	@DeleteMapping("delete")
+	@DeleteMapping("/delete/{cartItemId}")
 	public ResponseEntity<?> removeFromCart(@PathVariable int cartItemId)
 	{
 		cartservice.removeFromCart(cartItemId);
@@ -35,7 +35,7 @@ public class CartController
 	}
 	
 	@PutMapping("/update")
-	public ResponseEntity<?> UpdateQuantity(@RequestParam int cartItemId,@RequestParam int quantity )
+	public ResponseEntity<?> updateQuantity(@RequestParam int cartItemId,@RequestParam int quantity )
 	{
 		return ResponseEntity.ok(cartservice.updateQuantity(cartItemId , quantity));
 	}
