@@ -1,36 +1,35 @@
 package com.example.model;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Payment")
 public class Payment {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Payment_id")
-    private int paymentId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "Payment_id")
+	private int paymentId;
 
-    @Column(name = "Transaction_id")
-    private String transactionId;
-    
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Orders order;
+	@Column(name = "Transaction_id")
+	private String transactionId;
 
-    @Column(name = "Payment_date")
-    private LocalDateTime paymentDate;
+	@ManyToOne
+	@JoinColumn(name = "order_id")
+	private Orders order;
 
-    @Column(name = "Amount")
-    private double amount;
+	@Column(name = "Payment_date")
+	private LocalDateTime paymentDate;
 
-    @Enumerated(EnumType.STRING)
-    private PaymentStatus status;
-    
-    @Enumerated(EnumType.STRING)
-    private PaymentMethod mode;
+	@Column(name = "Amount")
+	private double amount;
+
+	@Enumerated(EnumType.STRING)
+	private PaymentStatus status;
+
+	@Enumerated(EnumType.STRING)
+	private PaymentMethod mode;
 
 	public int getPaymentId() {
 		return paymentId;
@@ -80,5 +79,11 @@ public class Payment {
 		this.mode = mode;
 	}
 
-   
+	public String getTransactionId() {
+		return transactionId;
+	}
+
+	public void setTransactionId(String transactionId) {
+		this.transactionId = transactionId;
+	}
 }
