@@ -13,6 +13,9 @@ public class Payment {
     @Column(name = "Payment_id")
     private int paymentId;
 
+    @Column(name = "Transaction_id")
+    private String transactionId;
+    
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Orders order;
@@ -25,6 +28,9 @@ public class Payment {
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
+    
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod mode;
 
 	public int getPaymentId() {
 		return paymentId;
@@ -64,6 +70,14 @@ public class Payment {
 
 	public void setStatus(PaymentStatus status) {
 		this.status = status;
+	}
+
+	public PaymentMethod getPaymentMethod() {
+		return mode;
+	}
+
+	public void setPaymentMethod(PaymentMethod mode) {
+		this.mode = mode;
 	}
 
    
