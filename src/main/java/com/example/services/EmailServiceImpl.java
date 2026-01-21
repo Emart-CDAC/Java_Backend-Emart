@@ -49,7 +49,7 @@ public class EmailServiceImpl implements EmailService {
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         if (!customer.isPromotionalEmail()) {
-            return; // user did not opt in
+            return; 
         }
 
         SimpleMailMessage mail = new SimpleMailMessage();

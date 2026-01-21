@@ -19,11 +19,9 @@ public class EmailController {
     @Autowired
     private EmailService emailService;
 
-    // Send Invoice Email
     @PostMapping("/send-invoice/{userId}")
     public ResponseEntity<String> sendInvoice(@PathVariable int userId) {
         try {
-            // Assume invoice PDF already generated
             File pdfFile = new File("D:/invoices/invoice_" + userId + ".pdf");
 
             emailService.sendInvoiceEmail(userId, pdfFile);
@@ -35,7 +33,6 @@ public class EmailController {
         }
     }
 
-    // Send Promotional Email
     @PostMapping("/send-promo/{userId}")
     public ResponseEntity<String> sendPromo(@PathVariable int userId) {
 
