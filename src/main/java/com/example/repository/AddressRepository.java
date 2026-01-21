@@ -7,10 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.model.Address;
 import com.example.model.Customer;
 
-public interface AddressRepository extends JpaRepository<Address,Long> {
-	
-	List<Address>  findById(Customer customer);
-	void deleteByIdAndCustomer(Long id,Customer customer);
-	List<Address> findByCustomerUserId(Long customerId);
-	
+public interface AddressRepository extends JpaRepository<Address, Long> {
+
+    // Get all addresses of a customer
+    List<Address> findByCustomer(Customer customer);
+
+    // Get all addresses using customerId
+    List<Address> findByCustomerUserId(Long customerId);
 }

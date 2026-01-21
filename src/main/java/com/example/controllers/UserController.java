@@ -23,13 +23,13 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public Customer viewProfile(@PathVariable Long userId) {
+    public Customer viewProfile(@PathVariable int userId) {
         return userService.getUserById(userId);
     }
 
     @PutMapping("/{userId}")
     public Customer updateProfile(
-            @PathVariable Long userId,
+            @PathVariable int userId,
             @RequestBody Customer customer) {
         return userService.updateUser(userId, customer);
     }

@@ -9,7 +9,6 @@ import com.example.repository.CustomerRepository;
 import com.example.services.AddressService;
 
 import java.util.List;
-
 @Service
 public class AddressServiceImpl implements AddressService {
 
@@ -31,12 +30,11 @@ public class AddressServiceImpl implements AddressService {
         return addressRepository.save(address);
     }
 
-
     @Override
     public Address updateAddress(Long addressId, Address address) {
         Address existing = addressRepository.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("Address not found"));
-        
+
         existing.setHouseNumber(address.getHouseNumber());
         existing.setLandmark(address.getLandmark());
         existing.setCity(address.getCity());
@@ -56,9 +54,12 @@ public class AddressServiceImpl implements AddressService {
         return addressRepository.findByCustomerUserId(customerId);
     }
 
-	@Override
-	public Address getUserAddress(Long userId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Address getUserAddress(Long userId) {
+        List<Address> addresses = addressRepository.findByCustomerUserId(userId);
+        if (addresses.isEmpty()) {
+            throw new RuntimeException("No address found");
+        }
+        return addresses.get(0);
+    }
 }
