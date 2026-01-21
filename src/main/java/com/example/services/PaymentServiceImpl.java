@@ -5,16 +5,12 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.model.Cart;
-import com.example.model.Customer;
-import com.example.model.Orders;
+
 import com.example.model.Payment;
 import com.example.model.PaymentMethod;
 import com.example.model.PaymentStatus;
-import com.example.repository.CartRepository;
-import com.example.repository.CustomerRepository;
 import com.example.repository.PaymentRepository;
-import com.example.services.PaymentService;
+
 
 @Service
 public class PaymentServiceImpl implements PaymentService {

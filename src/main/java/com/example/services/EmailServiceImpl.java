@@ -1,16 +1,14 @@
 package com.example.services;
 
-import java.io.File;
+import jakarta.mail.*;
+import jakarta.mail.internet.*;
+import jakarta.activation.DataHandler;
+import jakarta.mail.util.ByteArrayDataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.example.model.Customer;
-import com.example.repository.CustomerRepository;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import jakarta.mail.internet.MimeMessage;
+import org.springframework.stereotype.Service;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -18,51 +16,27 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    @Autowired
-    private CustomerRepository customerRepository;
-
     @Override
-    public void sendInvoiceEmail(int userId, File invoicePdf) throws Exception {
+    public void sendPdf(String toEmail, byte[] pdfBytes) {
 
-        Customer customer = customerRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(message, true);
 
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setTo(toEmail);
+            helper.setSubject("Invoice");
+            helper.setText("Please find your invoice attached.");
 
-        helper.setTo(customer.getEmail());
-        helper.setSubject("Your Invoice");
-        helper.setText(
-                "Dear " + customer.getFullName() + ",\n\n" +
-                "Please find your invoice attached.\n\nThank you for your purchase!"
-        );
+            ByteArrayDataSource dataSource =
+                    new ByteArrayDataSource(pdfBytes, "application/pdf");
 
-        helper.addAttachment("invoice.pdf", invoicePdf);
+            helper.addAttachment("invoice.pdf", dataSource);
 
-        mailSender.send(message);
-    }
+            mailSender.send(message);
 
-    @Override
-    public void sendPromotionalEmail(int userId) {
-
-        Customer customer = customerRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-
-        if (!customer.isPromotionalEmail()) {
-            return; 
+        } catch (Exception e) {
+            throw new RuntimeException("Mail sending failed", e);
         }
-
-        SimpleMailMessage mail = new SimpleMailMessage();
-        mail.setTo(customer.getEmail());
-        mail.setSubject("🔥 Exclusive Offer Just for You!");
-        mail.setText(
-                "Hello " + customer.getFullName() + ",\n\n" +
-                "We have exciting offers waiting for you.\n" +
-                "Check them out today!"
-        );
-
-        mailSender.send(mail);
     }
 }
-
-

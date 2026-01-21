@@ -1,11 +1,7 @@
 package com.example.controllers;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestClient.ResponseSpec;
 
 import com.example.model.Invoice;
-import com.example.model.Product;
+import com.example.model.OrderItems;
+import com.example.repository.InvoiceRepository;
+import com.example.repository.OrderItemRepository;
+import com.example.services.EmailService;
 import com.example.services.InvoiceService;
 import com.lowagie.text.DocumentException;
 
@@ -25,41 +23,85 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/invoice")
-public class InvoiceController 
-{
-	@Autowired
-	InvoiceService invoiceService;
-	
-	
-	@PostMapping("/generate/{orderId}")
-	public ResponseEntity<Invoice> generateInvoice(@PathVariable("orderId") int order_id)
-	{
-		Invoice invoice = invoiceService.addInvoice(order_id);
-		return ResponseEntity.ok(invoice);
-	}
-	
-	@GetMapping("/view/{invoiceId}")
-	public ResponseEntity<Invoice> viewInvoiceById(@PathVariable int invoiceId) {
-	    return invoiceService.findById(invoiceId)
-	            .map(ResponseEntity::ok)
-	            .orElse(ResponseEntity.notFound().build());
-	}
-	
-	@GetMapping("/export/pdf")
-    public void exportToPDF(HttpServletResponse response) throws DocumentException, IOException {
-        response.setContentType("application/pdf");
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-        String currentDateTime = dateFormatter.format(new Date());
-         
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=invoice_" + currentDateTime + ".pdf";
-        response.setHeader(headerKey, headerValue);
-         
-        List<Invoice> invoice = invoiceService.findAll();
-         
-        InvoicePDFExporter exporter = new InvoicePDFExporter(invoice);
-        exporter.export(response);
-         
+public class InvoiceController {
+
+    @Autowired
+    private InvoiceService invoiceService;
+
+    @Autowired
+    private InvoiceRepository invoiceRepo;
+
+    @Autowired
+    private OrderItemRepository orderItemsRepo;
+
+    @Autowired
+    private EmailService emailService;
+
+    // 1️⃣ Generate invoice for an order
+    @PostMapping("/generate/{orderId}")
+    public ResponseEntity<Invoice> generateInvoice(@PathVariable int orderId) {
+        return ResponseEntity.ok(invoiceService.addInvoice(orderId));
     }
-	
+
+    // 2️⃣ View invoice as JSON
+    @GetMapping("/view/{invoiceId}")
+    public ResponseEntity<Invoice> viewInvoiceById(@PathVariable int invoiceId) {
+        return invoiceService.findById(invoiceId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // 3️⃣ Mail latest invoice PDF
+    @GetMapping("/mail/latest")
+    public ResponseEntity<String> mailLatestInvoice() {
+
+        Invoice invoice = invoiceRepo.findTopByOrderByInvoiceIdDesc();
+        if (invoice == null) {
+            return ResponseEntity.badRequest().body("No invoice");
+        }
+
+        List<OrderItems> items =
+                orderItemsRepo.findByOrder_OrderId(
+                        invoice.getOrder().getOrderId()
+                );
+
+        InvoicePDFExporter exporter =
+                new InvoicePDFExporter(invoice, items);
+
+        byte[] pdf = exporter.generatePdfBytes();
+
+        emailService.sendPdf(
+                invoice.getCustomer().getEmail(),
+                pdf
+        );
+
+        return ResponseEntity.ok("Invoice mailed");
+    }
+
+    // 4️⃣ View / Download FULL invoice PDF in browser
+    @GetMapping("/export/pdf/{invoiceId}")
+    public void exportInvoicePdf(
+            @PathVariable int invoiceId,
+            HttpServletResponse response
+    ) throws IOException, DocumentException {
+
+        Invoice invoice = invoiceService.findById(invoiceId)
+                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+
+        List<OrderItems> items =
+                orderItemsRepo.findByOrder_OrderId(
+                        invoice.getOrder().getOrderId()
+                );
+
+        response.setContentType("application/pdf");
+        response.setHeader(
+                "Content-Disposition",
+                "inline; filename=invoice_" + invoiceId + ".pdf"
+        );
+
+        InvoicePDFExporter exporter =
+                new InvoicePDFExporter(invoice, items);
+
+        exporter.export(response);
+    }
 }
