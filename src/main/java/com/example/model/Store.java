@@ -3,67 +3,76 @@ package com.example.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "Store")
 public class Store {
 
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int Store_id;
-	
-	private String Store_Name;
-	private String City;
-	private String Address;
-	private String Contact_Number;
-	private boolean Availability;
-	
-	public int getStore_id() {
-		return Store_id;
-	}
-	public void setStore_id(int Store_id) {
-		this.Store_id = Store_id;
+    @Column(name = "Store_id")
+    private int storeId;
+
+    @Column(name = "Store_Name", nullable = false)
+    private String storeName;
+
+    @Column(name = "City", nullable = false)
+    private String city;
+
+    @Column(name = "Address", nullable = false)
+    private String address;
+
+    
+	@Column(name = "Contact_Number", nullable = false)
+    private String contactNumber;
+
+    @Column(name = "Availability")
+    private boolean availability;
+
+    public int getStoreId() {
+		return storeId;
 	}
 
-	public String getStore_name() {
-		return Store_Name;
+	public void setStoreId(int storeId) {
+		this.storeId = storeId;
 	}
 
-	public void setStore_name(String Store_Name) {
-		this.Store_Name = Store_Name;
+	public String getStoreName() {
+		return storeName;
+	}
+
+	public void setStoreName(String storeName) {
+		this.storeName = storeName;
 	}
 
 	public String getCity() {
-		return City;
+		return city;
 	}
 
-	public void setCity(String City) {
-		this.City = City;
+	public void setCity(String city) {
+		this.city = city;
 	}
 
 	public String getAddress() {
-		return Address;
+		return address;
 	}
 
-	public void setAddress(String Address) {
-		this.Address = Address;
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
-	public String getContact_number() {
-		return Contact_Number;
+	public String getContactNumber() {
+		return contactNumber;
 	}
 
-	public void setContact_number(String Contact_Number) {
-		this.Contact_Number = Contact_Number;
+	public void setContactNumber(String contactNumber) {
+		this.contactNumber = contactNumber;
 	}
 
 	public boolean isAvailability() {
-		return Availability;
+		return availability;
 	}
 
-	public void setAvailability(boolean Availability) {
-		this.Availability = Availability;
+	public void setAvailability(boolean availability) {
+		this.availability = availability;
 	}
 
-	
-	
 }
-
-

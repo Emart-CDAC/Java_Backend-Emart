@@ -1,87 +1,81 @@
 package com.example.model;
 
 import jakarta.persistence.*;
-
-enum OrderStatus {
-	PENDING, 
-	CONFIRMED,
-	SHIPPED,
-	DELIVERED,
-	CANCELLED
-}
-
-
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "Orders")
 public class Orders {
-	private int order_id;
-	private int User_id;
-	private int Cart_id;
-	private int order_date;
-	
-	@Enumerated(EnumType.STRING)
-	private OrderStatus status;
-	
-	@Enumerated(EnumType.STRING)
-	private PaymentStatus payment_status;
-	
-	@Enumerated(EnumType.STRING)
-	private DeliveryType delivery_type;
-	
-	private double total_amount;
-	private int epoints_used;
-	private int Address_id;
-	private int epoints_earned;
 
-	public Orders() {
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "order_id")
+    private int orderId;
 
-//	public Orders(int orderId, int userId, int cartId, int orderDate, String status, String paymentStatus,
-//			double totalAmt, String deliveryType, int epointsUsed, int addressId, int epointsEarned) {
-//		
-//		this.order_id = orderId;
-//		this.User_id = userId;
-//		this.Cart_id = cartId;
-//		this.order_date = orderDate;
-//		this.status = status;
-//		this.payment_status = paymentStatus;
-//		this.total_amount = totalAmt;
-//		this.delivery_type = deliveryType;
-//		this.epoints_used = epointsUsed;
-//		this.Address_id = addressId;
-//		this.epoints_earned = epointsEarned;
-//	}
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private Customer customer;
+
+    @ManyToOne
+    @JoinColumn(name = "cart_id")
+    private Cart cart;
+
+    @Column(name = "order_date")
+    private LocalDateTime orderDate;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
+
+    @Column(name = "total_amount")
+    private BigDecimal totalAmount;
+
+    @Enumerated(EnumType.STRING)
+    private DeliveryType deliveryType;
+
+    @Column(name = "epoints_used")
+    private int epointsUsed;
+
+    @ManyToOne
+    @JoinColumn(name = "Address_id")
+    private Address address;
+
+    @Column(name = "epoints_earned")
+    private int epointsEarned;
 
 	public int getOrderId() {
-		return order_id;
+		return orderId;
 	}
 
 	public void setOrderId(int orderId) {
-		this.order_id = orderId;
+		this.orderId = orderId;
 	}
 
-	public int getUserId() {
-		return User_id;
+	public Customer getCustomer() {
+		return customer;
 	}
 
-	public void setUserId(int userId) {
-		this.User_id = userId;
+	public void setCustomer(Customer customer) {
+		this.customer = customer;
 	}
 
-	public int getCartId() {
-		return Cart_id;
+	public Cart getCart() {
+		return cart;
 	}
 
-	public void setCartId(int cartId) {
-		this.Cart_id = cartId;
+	public void setCart(Cart cart) {
+		this.cart = cart;
 	}
 
-	public int getOrderDate() {
-		return order_date;
+	public LocalDateTime getOrderDate() {
+		return orderDate;
 	}
 
-	public void setOrderDate(int orderdate) {
-		this.order_date = orderdate;
+	public void setOrderDate(LocalDateTime orderDate) {
+		this.orderDate = orderDate;
 	}
 
 	public OrderStatus getStatus() {
@@ -93,50 +87,52 @@ public class Orders {
 	}
 
 	public PaymentStatus getPaymentStatus() {
-		return payment_status;
+		return paymentStatus;
 	}
 
 	public void setPaymentStatus(PaymentStatus paymentStatus) {
-		this.payment_status = paymentStatus;
+		this.paymentStatus = paymentStatus;
 	}
 
-	public double getTotalAmount() {
-		return total_amount;
+	public BigDecimal getTotalAmount() {
+		return totalAmount;
 	}
 
-	public void setTotalAmount(double totalAmount) {
-		this.total_amount = totalAmount;
+	public void setTotalAmount(BigDecimal totalAmount) {
+		this.totalAmount = totalAmount;
 	}
 
 	public DeliveryType getDeliveryType() {
-		return delivery_type;
+		return deliveryType;
 	}
 
 	public void setDeliveryType(DeliveryType deliveryType) {
-		this.delivery_type = deliveryType;
+		this.deliveryType = deliveryType;
 	}
 
 	public int getEpointsUsed() {
-		return epoints_used;
+		return epointsUsed;
 	}
 
 	public void setEpointsUsed(int epointsUsed) {
-		this.epoints_used = epointsUsed;
+		this.epointsUsed = epointsUsed;
 	}
 
-	public int getAddressId() {
-		return Address_id;
+	public Address getAddress() {
+		return address;
 	}
 
-	public void setAddressId(int addressId) {
-		this.Address_id = addressId;
+	public void setAddress(Address address) {
+		this.address = address;
 	}
 
 	public int getEpointsEarned() {
-		return epoints_earned;
+		return epointsEarned;
 	}
 
 	public void setEpointsEarned(int epointsEarned) {
-		this.epoints_earned = epointsEarned;
+		this.epointsEarned = epointsEarned;
 	}
+
+    
 }
