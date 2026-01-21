@@ -1,62 +1,57 @@
 package com.example.model;
 
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.*;
 
 @Entity
-@Table(name = "subcategory")
+@Table(name = "Sub_Category")
 public class SubCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
-    @Column(name = "subcategory_name", nullable = false, length = 100)
-    private String name;
+    @Column(name = "SubCategory_id")
+    private int subCategoryId;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "Category_id", nullable = false)
     private Category category;
 
-    
-    public SubCategory() {
-    }
+    @Column(name = "Brand")
+    private String brand;
+
+    @Column(name = "Sponsors")
+    private boolean sponsors;
+
+	public int getSubCategoryId() {
+		return subCategoryId;
+	}
+
+	public void setSubCategoryId(int subCategoryId) {
+		this.subCategoryId = subCategoryId;
+	}
+
+	public Category getCategory() {
+		return category;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
+	}
+
+	public String getBrand() {
+		return brand;
+	}
+
+	public void setBrand(String brand) {
+		this.brand = brand;
+	}
+
+	public boolean isSponsors() {
+		return sponsors;
+	}
+
+	public void setSponsors(boolean sponsors) {
+		this.sponsors = sponsors;
+	}
 
     
-    public SubCategory(String name, Category category) {
-        this.name = name;
-        this.category = category;
-    }
-
-    
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
 }
