@@ -39,7 +39,7 @@ public class InvoiceServiceImp implements InvoiceService
         if (order.getTotalAmount() != null) {
             invoice.setTotalAmount(order.getTotalAmount().doubleValue());
         } else {
-            invoice.setTotalAmount(0.0);
+            invoice.setTotalAmount(order.getCart().getTotalAmount());
         }
 
         invoice.setDeliveryType(order.getDeliveryType());   // take delivery type from order
