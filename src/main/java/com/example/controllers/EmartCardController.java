@@ -1,63 +1,40 @@
 package com.example.controllers;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.example.model.EmartCard;
-import com.example.repository.EmartCardRepository;
+import com.example.services.EmartCardService;
 
 @RestController
-@RequestMapping("/emart-card")
+@RequestMapping("/api/emart-card")
 public class EmartCardController {
 
-    @Autowired
-    private EmartCardRepository emartCardRepository;
+	private final EmartCardService emartCardService;
+
+    public EmartCardController(EmartCardService emartCardService) {
+        this.emartCardService = emartCardService;
+    }
 
     @PostMapping("/apply")
-    public ResponseEntity<String> applyEmartCard(@RequestBody EmartCard card) {
-
-        card.setApplicationStatus("PENDING");
-        card.setApplyDate(LocalDate.now());
-
-        emartCardRepository.save(card);
-
-        return ResponseEntity.ok("EMart Card application submitted successfully");
+    public EmartCard applyForCard(@RequestBody EmartCard card) {
+        return emartCardService.applyForCard(card);
     }
 
-    @GetMapping("/all")
-    public List<EmartCard> getAllApplications() {
-        return emartCardRepository.findAll();
+    @PostMapping("/use-epoints")
+    public String useEpoints(@RequestParam int userId,
+                             @RequestParam int pointsUsed) {
+        emartCardService.useEpoints(userId, pointsUsed);
+        return "E-points updated successfully";
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<EmartCard> getApplicationById(@PathVariable int id) {
-
-        return emartCardRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PutMapping("/approve/{id}")
-    public ResponseEntity<String> approveCard(@PathVariable int id) {
-
-        return emartCardRepository.findById(id).map(card -> {
-            card.setApplicationStatus("APPROVED");
-            emartCardRepository.save(card);
-            return ResponseEntity.ok("EMart Card approved");
-        }).orElse(ResponseEntity.notFound().build());
-    }
-
-    @PutMapping("/reject/{id}")
-    public ResponseEntity<String> rejectCard(@PathVariable int id) {
-
-        return emartCardRepository.findById(id).map(card -> {
-            card.setApplicationStatus("REJECTED");
-            emartCardRepository.save(card);
-            return ResponseEntity.ok("EMart Card rejected");
-        }).orElse(ResponseEntity.notFound().build());
+    @GetMapping("/details/{userId}")
+    public EmartCard getCardDetails(@PathVariable int userId) {
+        return emartCardService.getCardDetails(userId);
     }
 }

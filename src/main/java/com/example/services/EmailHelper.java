@@ -11,7 +11,6 @@ import jakarta.mail.internet.MimeMessage;
 public class EmailHelper {
 
     private EmailHelper() {
-        // utility class
     }
 
     public static void sendMailWithAttachment(
