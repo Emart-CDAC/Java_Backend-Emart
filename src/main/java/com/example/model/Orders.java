@@ -10,27 +10,29 @@ public class Orders {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id")
+    @Column(name = "Order_id")
     private int orderId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "User_id")
     private Customer customer;
 
     @ManyToOne
-    @JoinColumn(name = "cart_id")
+    @JoinColumn(name = "Cart_id")
     private Cart cart;
 
-    @Column(name = "order_date")
+    @Column(name = "Order_Date")
     private LocalDateTime orderDate;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "Status")
     private OrderStatus status;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "Payment_Status")
     private PaymentStatus paymentStatus;
 
-    @Column(name = "total_amount")
+    @Column(name = "Total_Amount")
     private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
