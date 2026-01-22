@@ -1,25 +1,25 @@
 package com.example.services;
 
-import com.example.model.Product;
-
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.dto.ProductRequestDTO;
+import com.example.dto.ProductResponseDTO;
+
 public interface ProductService {
 
-    List<Product> getAllProducts();
+    List<ProductResponseDTO> getAllProducts();
 
-    Optional<Product> getProductById(int id);
+    ProductResponseDTO getProductById(int id);
 
-    Product createProduct(Product product);
+    ProductResponseDTO createProduct(ProductRequestDTO dto);
 
-    Product updateProduct(int id, Product product);
+    ProductResponseDTO updateProduct(int id, ProductRequestDTO dto);
 
     void deleteProduct(int id);
-    
+
     void uploadProducts(MultipartFile file);
-    
-    List<Product> searchProducts(String keyword);
+
+    List<ProductResponseDTO> searchProducts(String keyword);
 }
