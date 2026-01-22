@@ -3,9 +3,11 @@ package com.example.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 
 import com.example.services.AdminService;
 
@@ -13,15 +15,48 @@ import com.example.services.AdminService;
 @RequestMapping("/api/admin")
 public class AdminController {
 
-    @Autowired
-    private AdminService adminService;
+	@Autowired
+	private AdminService adminService;
 
-    @PostMapping("/login")
-    public ResponseEntity<String> login(
-            @RequestParam String username,
-            @RequestParam String password) {
+	@PostMapping("/login")
+	public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest request) {
 
-        adminService.login(username, password);
-        return ResponseEntity.ok("Admin login successful");
-    }
+		String token = adminService.login(request.getEmail(), request.getPassword());
+
+		return ResponseEntity.ok(new TokenResponse(token));
+	}
+
+}
+
+class LoginRequest {
+	private String email;
+	private String password;
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+}
+
+class TokenResponse {
+	private String accessToken;
+
+	public TokenResponse(String accessToken) {
+		this.accessToken = accessToken;
+	}
+
+	public String getAccessToken() {
+		return accessToken;
+	}
 }
