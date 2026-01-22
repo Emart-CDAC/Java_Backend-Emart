@@ -9,6 +9,8 @@ import com.example.model.Customer;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Integer> {
-    Optional<Customer> findByUserId(int userId);
 
+	Optional<Customer> findByUserId(int userId);
+
+	Optional<Customer> findByEmail(String email);
 }
