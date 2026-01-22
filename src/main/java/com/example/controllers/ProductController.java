@@ -2,6 +2,8 @@ package com.example.controllers;
 
 import com.example.model.Product;
 import com.example.repository.ProductRepository;
+import com.example.services.ProductService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,9 @@ public class ProductController {
 
     @Autowired
     private ProductRepository productRepository;
+    
+    @Autowired
+    private ProductService productService;
 
     
     @GetMapping
@@ -70,5 +75,9 @@ public class ProductController {
         }
         productRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/search")
+    public List<Product> search(@RequestParam String q) {
+        return productService.searchProducts(q);
     }
 }

@@ -12,5 +12,8 @@ import com.example.model.Product;
 public interface CartItemRepository extends JpaRepository<CartItems, Integer> {
     List<CartItems> findByCart(Cart cart);
     Optional<CartItems> findByCartAndProduct(Cart cart, Product product);
+    void deleteByCart_CartId(int cartId);
+
+
 }
 

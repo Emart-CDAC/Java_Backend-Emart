@@ -127,4 +127,7 @@ public class CartServiceImpl implements CartService
         cart.setTotalAmount(total);
         cartRepository.save(cart);
     }
+    public void clearCartByUser(int userId) {
+        cartItemRepository.deleteByCart_CartId(userId);
+    }
 }

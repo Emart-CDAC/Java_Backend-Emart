@@ -4,7 +4,8 @@ import com.example.model.Product;
 import com.example.repository.CategoryRepository;
 import com.example.repository.ProductRepository;
 import com.example.repository.SubCategoryRepository;
-import com.example.util.ProductExcelHelper;
+import com.example.util.ProductCSVHelper;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,15 +68,15 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(id);
     }
 
-	@Override
-	public void uploadProducts(MultipartFile file) {
+    @Override
+    public void uploadProducts(MultipartFile file) {
 
-        if (!ProductExcelHelper.isExcelFile(file)) {
-            throw new RuntimeException("Invalid Excel file");
+        if (!file.getOriginalFilename().endsWith(".csv")) {
+            throw new RuntimeException("Invalid CSV file");
         }
 
         try {
-            List<Product> products = ProductExcelHelper.parseExcel(
+            List<Product> products = ProductCSVHelper.parseCSV(
                     file.getInputStream(),
                     categoryRepo,
                     subCategoryRepo
@@ -86,5 +87,9 @@ public class ProductServiceImpl implements ProductService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+	public List<Product> searchProducts(String keyword) {
+        return productRepository.searchProducts(keyword);
     }
 }

@@ -20,4 +20,6 @@ public interface ProductService {
     void deleteProduct(int id);
     
     void uploadProducts(MultipartFile file);
+    
+    List<Product> searchProducts(String keyword);
 }
