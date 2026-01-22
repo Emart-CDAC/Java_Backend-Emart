@@ -9,49 +9,61 @@ import com.example.repository.CustomerRepository;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private CustomerRepository customerRepository;
+	@Autowired
+	private CustomerRepository customerRepository;
 
-    @Override
-    public Customer registerUser(Customer customer) {
-        // basic registration
-        return customerRepository.save(customer);
-    }
+	@Override
+	public Customer login(String email, String password) {
 
-    @Override
-    public Customer getUserById(int userId) {
-        return customerRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
+		Customer customer = customerRepository.findByEmail(email)
+				.orElseThrow(() -> new RuntimeException("User not found"));
 
-    @Override
-    public Customer updateUser(int userId, Customer updatedCustomer) {
+		if (!customer.getPassword().equals(password)) {
+			throw new RuntimeException("Invalid credentials");
+		}
 
-        Customer existingCustomer = customerRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+		return customer;
+	}
 
-        existingCustomer.setFullName(updatedCustomer.getFullName());
-        existingCustomer.setEmail(updatedCustomer.getEmail());
-        existingCustomer.setMobile(updatedCustomer.getMobile());
-        existingCustomer.setBirthDate(updatedCustomer.getBirthDate());
-        existingCustomer.setInterests(updatedCustomer.getInterests());
+	@Override
+	public Customer registerUser(Customer customer) {
+		// basic registration
+		return customerRepository.save(customer);
+	}
 
-        return customerRepository.save(existingCustomer);
-    }
+	@Override
+	public Customer getUserById(int userId) {
+		return customerRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+	}
 
-    @Override
-    public String changePassword(int userId, String oldPassword, String newPassword) {
+	@Override
+	public Customer updateUser(int userId, Customer updatedCustomer) {
 
-        Customer customer = customerRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+		Customer existingCustomer = customerRepository.findById(userId)
+				.orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!customer.getPassword().equals(oldPassword)) {
-            throw new RuntimeException("Old password is incorrect");
-        }
+		existingCustomer.setFullName(updatedCustomer.getFullName());
+		existingCustomer.setEmail(updatedCustomer.getEmail());
+		existingCustomer.setMobile(updatedCustomer.getMobile());
+		existingCustomer.setBirthDate(updatedCustomer.getBirthDate());
+		existingCustomer.setInterests(updatedCustomer.getInterests());
 
-        customer.setPassword(newPassword);
-        customerRepository.save(customer);
+		return customerRepository.save(existingCustomer);
+	}
 
-        return "Password updated successfully";
-    }
+	@Override
+	public String changePassword(int userId, String oldPassword, String newPassword) {
+
+		Customer customer = customerRepository.findById(userId)
+				.orElseThrow(() -> new RuntimeException("User not found"));
+
+		if (!customer.getPassword().equals(oldPassword)) {
+			throw new RuntimeException("Old password is incorrect");
+		}
+
+		customer.setPassword(newPassword);
+		customerRepository.save(customer);
+
+		return "Password updated successfully";
+	}
 }

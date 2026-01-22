@@ -4,6 +4,8 @@ import com.example.model.Customer;
 
 public interface UserService {
 
+	Customer login(String username, String password);
+	
     Customer registerUser(Customer customer);
 
     Customer getUserById(int userId);

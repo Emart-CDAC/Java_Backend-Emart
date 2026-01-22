@@ -16,7 +16,7 @@ import com.example.model.Orders;
 import com.example.services.OrdersService;
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/api/order")
 public class OrderController 
 {
 	
