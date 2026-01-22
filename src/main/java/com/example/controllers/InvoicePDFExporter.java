@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
+import com.example.model.Address;
 import com.example.model.Invoice;
 import com.example.model.OrderItems;
 import com.lowagie.text.*;
@@ -58,37 +59,65 @@ public class InvoicePDFExporter {
     
     private void writeContent(Document document) throws DocumentException {
 
-        Font title = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
-        Font header = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12);
-        Font text = FontFactory.getFont(FontFactory.HELVETICA, 11);
+        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20);
+        Font bold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11);
+        Font normal = FontFactory.getFont(FontFactory.HELVETICA, 11);
+        Font small = FontFactory.getFont(FontFactory.HELVETICA, 9);
 
-        Paragraph p = new Paragraph("EMART INVOICE\n\n", title);
-        p.setAlignment(Element.ALIGN_CENTER);
-        document.add(p);
+        /* ================= HEADER ================= */
+        PdfPTable header = new PdfPTable(2);
+        header.setWidthPercentage(100);
+        header.setWidths(new float[]{3, 1});
 
-        addLine(document, "Invoice ID", String.valueOf(invoice.getInvoiceId()), header, text);
-        addLine(document, "Order ID", String.valueOf(invoice.getOrder().getOrderId()), header, text);
-        addLine(document, "Order Date", invoice.getOrderDate().toString(), header, text);
-        addLine(document, "Customer", invoice.getCustomer().getFullName(), header, text);
-        addLine(document, "Email", invoice.getCustomer().getEmail(), header, text);
+        PdfPCell left = new PdfPCell(new Phrase("EMART INVOICE", titleFont));
+        left.setBorder(0);
 
-        document.add(new Paragraph("\n"));
+        PdfPCell right = new PdfPCell(new Phrase(
+                "TOTAL\n₹ " + invoice.getTotalAmount(),
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)
+        ));
+        right.setHorizontalAlignment(Element.ALIGN_CENTER);
+        right.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        right.setBackgroundColor(new Color(255, 165, 0));
+        right.setBorder(0);
 
-        
-        var a = invoice.getOrder().getAddress();
-        String address =
-                (a.getHouseNumber() != null ? a.getHouseNumber() + ", " : "") +
-                a.getTown() + ", " +
-                a.getCity() + " - " +
-                a.getPincode() + ", " +
-                a.getState();
-
-        addLine(document, "Billing Address", address, header, text);
-        addLine(document, "Shipping Address", address, header, text);
+        header.addCell(left);
+        header.addCell(right);
+        document.add(header);
 
         document.add(new Paragraph("\n"));
 
-        
+        /* ================= SELLER & BUYER ================= */
+        PdfPTable parties = new PdfPTable(2);
+        parties.setWidthPercentage(100);
+
+        parties.addCell(infoCell(
+                "Sold By:\nEMART Pvt Ltd\nIndia",
+                bold
+        ));
+
+        parties.addCell(infoCell(
+                "Bill To:\n" +
+                invoice.getCustomer().getFullName() + "\n" +
+                invoice.getCustomer().getEmail(),
+                bold
+        ));
+
+        document.add(parties);
+        document.add(new Paragraph("\n"));
+
+        /* ================= INVOICE META ================= */
+        PdfPTable meta = new PdfPTable(3);
+        meta.setWidthPercentage(100);
+
+        meta.addCell(metaCell("Invoice No", invoice.getInvoiceId()+""));
+        meta.addCell(metaCell("Order ID", invoice.getOrder().getOrderId()+""));
+        meta.addCell(metaCell("Invoice Date", invoice.getOrderDate().toString()));
+
+        document.add(meta);
+        document.add(new Paragraph("\n"));
+
+        /* ================= PRODUCT TABLE ================= */
         PdfPTable table = new PdfPTable(4);
         table.setWidthPercentage(100);
         table.setWidths(new float[]{4, 1, 2, 2});
@@ -96,34 +125,68 @@ public class InvoicePDFExporter {
         addHeader(table, "Product");
         addHeader(table, "Qty");
         addHeader(table, "Price");
-        addHeader(table, "Subtotal");
+        addHeader(table, "Amount");
 
         double subtotal = 0;
 
         for (OrderItems i : items) {
-            table.addCell(i.getProduct().getName());
-            table.addCell(String.valueOf(i.getQuantity()));
-            table.addCell(String.valueOf(i.getPrice()));
-            table.addCell(String.valueOf(i.getSubtotal()));
+            table.addCell(new PdfPCell(new Phrase(i.getProduct().getName(), normal)));
+            table.addCell(centerCell(i.getQuantity()+""));
+            table.addCell(centerCell("₹ " + i.getPrice()));
+            table.addCell(centerCell("₹ " + i.getSubtotal()));
             subtotal += i.getSubtotal();
         }
 
         document.add(table);
         document.add(new Paragraph("\n"));
 
-        
-        addLine(document, "Subtotal", String.valueOf(subtotal), header, text);
-        addLine(document, "Discount", String.valueOf(invoice.getDiscountAmount()), header, text);
-        addLine(document, "Tax", String.valueOf(invoice.getTaxAmount()), header, text);
-        addLine(document, "Total Amount", String.valueOf(invoice.getTotalAmount()), header, text);
+        /* ================= SUMMARY ================= */
+        PdfPTable summary = new PdfPTable(2);
+        summary.setWidthPercentage(40);
+        summary.setHorizontalAlignment(Element.ALIGN_RIGHT);
+
+        summary.addCell(sumCell("Subtotal"));
+        summary.addCell(sumCell("₹ " + subtotal));
+
+        summary.addCell(sumCell("Discount"));
+        summary.addCell(sumCell("- ₹ " + invoice.getDiscountAmount()));
+
+        summary.addCell(sumCell("Tax"));
+        summary.addCell(sumCell("₹ " + invoice.getTaxAmount()));
+
+        PdfPCell totalLabel = sumCell("TOTAL");
+        totalLabel.setBackgroundColor(Color.LIGHT_GRAY);
+
+        PdfPCell totalVal = sumCell("₹ " + invoice.getTotalAmount());
+        totalVal.setBackgroundColor(Color.LIGHT_GRAY);
+
+        summary.addCell(totalLabel);
+        summary.addCell(totalVal);
+
+        document.add(summary);
+        document.add(new Paragraph("\n"));
+
+        /* ================= E-POINTS ================= */
+        PdfPTable points = new PdfPTable(2);
+        points.setWidthPercentage(50);
+
+        points.addCell(metaCell("E-Points Used", invoice.getEpointsUsed()+""));
+        points.addCell(metaCell("E-Points Earned", invoice.getEpointsEarned()+""));
+        points.addCell(metaCell("E-Points Balance", invoice.getEpointsBalance()+""));
+
+        document.add(points);
 
         document.add(new Paragraph("\n"));
 
-        
-        addLine(document, "E-Points Used", String.valueOf(invoice.getEpointsUsed()), header, text);
-        addLine(document, "E-Points Earned", String.valueOf(invoice.getEpointsEarned()), header, text);
-        addLine(document, "E-Points Balance", String.valueOf(invoice.getEpointsBalance()), header, text);
+        /* ================= NOTES ================= */
+        document.add(new Paragraph(
+                "NOTES:\n" +
+                "1. Amount includes applicable taxes.\n" +
+                "2. This is a system generated invoice.",
+                small
+        ));
     }
+
 
     private void addHeader(PdfPTable table, String text) {
         PdfPCell cell = new PdfPCell(new Phrase(text));
@@ -138,4 +201,28 @@ public class InvoicePDFExporter {
         p.add(new Chunk(value, valFont));
         doc.add(p);
     }
+    private PdfPCell infoCell(String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        cell.setPadding(8);
+        return cell;
+    }
+
+    private PdfPCell metaCell(String key, String value) {
+        PdfPCell cell = new PdfPCell(new Phrase(key + "\n" + value));
+        cell.setPadding(6);
+        return cell;
+    }
+
+    private PdfPCell centerCell(String text) {
+        PdfPCell cell = new PdfPCell(new Phrase(text));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        return cell;
+    }
+
+    private PdfPCell sumCell(String text) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11)));
+        cell.setPadding(6);
+        return cell;
+    }
+
 }

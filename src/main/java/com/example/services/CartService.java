@@ -12,4 +12,5 @@ public interface CartService {
     CartItems updateQuantity(int cartItemId, int quantity);
 
     List<CartItems> viewCart(int userId);
+    void clearCartByUser(int userId);
 }

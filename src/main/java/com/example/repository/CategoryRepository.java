@@ -8,6 +8,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CategoryRepository extends JpaRepository<Category, Integer> 
 {
-	Optional<Category> findByCategoryName(String categoryName);
+	Optional<Category> findByCategoryNameIgnoreCase(String name);
+
+	Optional<Category> findByCategoryNameAndParentCategory(
+	        String categoryName,
+	        Category parentCategory
+	);
 	
 }
