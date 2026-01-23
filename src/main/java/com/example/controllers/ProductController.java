@@ -1,7 +1,10 @@
 package com.example.controllers;
 
+import com.example.dto.ProductResponseDTO;
 import com.example.model.Product;
 import com.example.repository.ProductRepository;
+import com.example.services.ProductService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +19,9 @@ public class ProductController {
 
     @Autowired
     private ProductRepository productRepository;
+    
+    @Autowired
+    private ProductService productService;
 
     
     @GetMapping
@@ -23,7 +29,7 @@ public class ProductController {
         return productRepository.findAll();
     }
 
-    // Get product by ID
+    
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable int id) {
         Optional<Product> product = productRepository.findById(id);
@@ -31,14 +37,14 @@ public class ProductController {
                       .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Add new product
+   
     @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         Product savedProduct = productRepository.save(product);
         return ResponseEntity.ok(savedProduct);
     }
 
-    // Update product
+   
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(
             @PathVariable int id,
@@ -63,7 +69,7 @@ public class ProductController {
         return ResponseEntity.ok(productRepository.save(product));
     }
 
-    // Delete product
+   
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable int id) {
         if (!productRepository.existsById(id)) {
@@ -71,5 +77,9 @@ public class ProductController {
         }
         productRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/search")
+    public List<ProductResponseDTO> search(@RequestParam String q) {
+        return productService.searchProducts(q);
     }
 }

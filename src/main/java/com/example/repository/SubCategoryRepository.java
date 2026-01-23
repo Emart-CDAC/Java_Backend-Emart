@@ -12,4 +12,5 @@ public interface SubCategoryRepository extends JpaRepository<SubCategory, Intege
 
     List<SubCategory> findByCategoryCategoryId(int categoryId);
     Optional<SubCategory> findByCategoryAndBrand(Category category, String brand);
+    Optional<SubCategory> findByCategoryAndBrandIgnoreCase(Category category, String brand);
 }

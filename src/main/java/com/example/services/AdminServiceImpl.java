@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.model.Admin;
 import com.example.repository.AdminRepository;
+import com.example.security.JwtUtil;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -12,10 +13,13 @@ public class AdminServiceImpl implements AdminService {
     @Autowired
     private AdminRepository adminRepository;
 
-    @Override
-    public Admin login(String username, String password) {
+    @Autowired
+    private JwtUtil jwtUtil;
 
-        Admin admin = adminRepository.findByUsername(username)
+    @Override
+    public String login(String email, String password) {
+
+        Admin admin = adminRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Admin not found"));
 
         if (!admin.getPassword().equals(password)) {
@@ -26,7 +30,6 @@ public class AdminServiceImpl implements AdminService {
             throw new RuntimeException("Admin inactive");
         }
 
-        return admin;
+        return jwtUtil.generateToken(email, "ROLE_ADMIN");
     }
 }
-

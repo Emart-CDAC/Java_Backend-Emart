@@ -17,7 +17,7 @@ public class ProductUploadController {
     @Autowired
     private ProductService productService;
 
-    @PostMapping("/upload-excel")
+    @PostMapping("/upload-csv")
     public ResponseEntity<String> uploadExcel(
             @RequestParam("file") MultipartFile file) {
 

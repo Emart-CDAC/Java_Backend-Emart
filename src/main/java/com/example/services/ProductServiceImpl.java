@@ -1,24 +1,27 @@
 package com.example.services;
 
-import com.example.model.Product;
-import com.example.repository.CategoryRepository;
-import com.example.repository.ProductRepository;
-import com.example.repository.SubCategoryRepository;
-import com.example.util.ProductExcelHelper;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
+import com.example.dto.ProductRequestDTO;
+import com.example.dto.ProductResponseDTO;
+import com.example.mapper.ProductMapper;
+import com.example.model.Product;
+import com.example.model.SubCategory;
+import com.example.repository.CategoryRepository;
+import com.example.repository.ProductRepository;
+import com.example.repository.SubCategoryRepository;
+import com.example.util.ProductCSVHelper;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ProductRepository productRepository;
-    
+
     @Autowired
     private CategoryRepository categoryRepo;
 
@@ -26,40 +29,51 @@ public class ProductServiceImpl implements ProductService {
     private SubCategoryRepository subCategoryRepo;
 
     @Override
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public List<ProductResponseDTO> getAllProducts() {
+        return productRepository.findAll()
+                .stream()
+                .map(ProductMapper::toDTO)
+                .toList();
     }
 
     @Override
-    public Optional<Product> getProductById(int id) {
-        return productRepository.findById(id);
+    public ProductResponseDTO getProductById(int id) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        return ProductMapper.toDTO(product);
     }
 
+   
     @Override
-    public Product createProduct(Product product) {
-        return productRepository.save(product);
+    public ProductResponseDTO createProduct(ProductRequestDTO dto) {
+
+        SubCategory subCategory = subCategoryRepo.findById(dto.getSubCategoryId())
+                .orElseThrow(() -> new RuntimeException("SubCategory not found"));
+
+        Product product = ProductMapper.toEntity(dto, subCategory);
+        Product saved = productRepository.save(product);
+
+        return ProductMapper.toDTO(saved);
     }
 
+   
     @Override
-    public Product updateProduct(int id, Product updatedProduct) {
+    public ProductResponseDTO updateProduct(int id, ProductRequestDTO dto) {
 
-        Optional<Product> existingProduct = productRepository.findById(id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        if (existingProduct.isEmpty()) {
-            return null;
-        }
+        product.setName(dto.getName());
+        product.setImageUrl(dto.getImageUrl());
+        product.setNormalPrice(dto.getNormalPrice());
+        product.setEcardPrice(dto.getEcardPrice());
+        product.setAvailableQuantity(dto.getAvailableQuantity());
+        product.setDescription(dto.getDescription());
+        product.setStoreId(dto.getStoreId());
 
-        Product product = existingProduct.get();
-        product.setName(updatedProduct.getName());
-        product.setImageUrl(updatedProduct.getImageUrl());
-        product.setNormalPrice(updatedProduct.getNormalPrice());
-        product.setEcardPrice(updatedProduct.getEcardPrice());
-        product.setAvailableQuantity(updatedProduct.getAvailableQuantity());
-        product.setDescription(updatedProduct.getDescription());
-        product.setSubCategory(updatedProduct.getSubCategory());
-        product.setStoreId(updatedProduct.getStoreId());
-
-        return productRepository.save(product);
+        return ProductMapper.toDTO(productRepository.save(product));
     }
 
     @Override
@@ -67,15 +81,15 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(id);
     }
 
-	@Override
-	public void uploadProducts(MultipartFile file) {
+    @Override
+    public void uploadProducts(MultipartFile file) {
 
-        if (!ProductExcelHelper.isExcelFile(file)) {
-            throw new RuntimeException("Invalid Excel file");
+        if (!file.getOriginalFilename().endsWith(".csv")) {
+            throw new RuntimeException("Invalid CSV file");
         }
 
         try {
-            List<Product> products = ProductExcelHelper.parseExcel(
+            List<Product> products = ProductCSVHelper.parseCSV(
                     file.getInputStream(),
                     categoryRepo,
                     subCategoryRepo
@@ -86,5 +100,14 @@ public class ProductServiceImpl implements ProductService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @Override
+    public List<ProductResponseDTO> searchProducts(String keyword) {
+
+        return productRepository.searchProducts(keyword)
+                .stream()
+                .map(ProductMapper::toDTO)
+                .toList();
     }
 }

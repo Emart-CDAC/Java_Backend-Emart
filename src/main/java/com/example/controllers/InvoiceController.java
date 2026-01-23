@@ -22,7 +22,7 @@ import com.lowagie.text.DocumentException;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
-@RequestMapping("/invoice")
+@RequestMapping("/api/invoice")
 public class InvoiceController {
 
     @Autowired
@@ -37,13 +37,13 @@ public class InvoiceController {
     @Autowired
     private EmailService emailService;
 
-    // 1️⃣ Generate invoice for an order
+   
     @PostMapping("/generate/{orderId}")
     public ResponseEntity<Invoice> generateInvoice(@PathVariable int orderId) {
         return ResponseEntity.ok(invoiceService.addInvoice(orderId));
     }
 
-    // 2️⃣ View invoice as JSON
+   
     @GetMapping("/view/{invoiceId}")
     public ResponseEntity<Invoice> viewInvoiceById(@PathVariable int invoiceId) {
         return invoiceService.findById(invoiceId)
@@ -51,7 +51,7 @@ public class InvoiceController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 3️⃣ Mail latest invoice PDF
+  
     @GetMapping("/mail/latest")
     public ResponseEntity<String> mailLatestInvoice() {
 
@@ -78,7 +78,7 @@ public class InvoiceController {
         return ResponseEntity.ok("Invoice mailed");
     }
 
-    // 4️⃣ View / Download FULL invoice PDF in browser
+ 
     @GetMapping("/export/pdf/{invoiceId}")
     public void exportInvoicePdf(
             @PathVariable int invoiceId,
