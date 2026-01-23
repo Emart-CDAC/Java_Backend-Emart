@@ -7,40 +7,81 @@ import org.springframework.web.bind.annotation.*;
 import com.example.model.Customer;
 import com.example.security.JwtUtil;
 import com.example.services.UserService;
+import com.example.services.UserServiceImpl;
+import com.example.dto.LoginRequest;
+import com.example.dto.TokenResponse;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
-	@Autowired
-	UserService userService;
+    @Autowired
+    private UserService userService;
 
-	@Autowired
-	private JwtUtil jwtUtil;
+    @Autowired
+    private UserServiceImpl userServiceImpl;
 
-	@PostMapping("/login")
-	public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest request) {
+    @Autowired
+    private JwtUtil jwtUtil;
 
-		Customer customer = userService.login(request.getEmail(), request.getPassword());
+    // ===================== LOCAL LOGIN =====================
+    @PostMapping("/login")
+    public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest request) {
 
-		String token = jwtUtil.generateToken(customer.getEmail(), "ROLE_USER");
+        Customer customer = userService.login(
+                request.getEmail(),
+                request.getPassword());
 
-		return ResponseEntity.ok(new TokenResponse(token));
-	}
+        String token = jwtUtil.generateToken(
+                customer.getEmail(),
+                "ROLE_USER");
 
-	@PostMapping("/register")
-	public Customer registerUser(@RequestBody Customer customer) {
-		return userService.registerUser(customer);
-	}
+        return ResponseEntity.ok(new TokenResponse(token));
+    }
 
-	@GetMapping("/{userId}")
-	public Customer viewProfile(@PathVariable int userId) {
-		return userService.getUserById(userId);
-	}
+    // ===================== NORMAL REGISTER =====================
+    @PostMapping("/register")
+    public Customer registerUser(@RequestBody Customer customer) {
+        return userService.registerUser(customer);
+    }
 
-	@PutMapping("/{userId}")
-	public Customer updateProfile(@PathVariable int userId, @RequestBody Customer customer) {
-		return userService.updateUser(userId, customer);
-	}
+    // ===================== GOOGLE SSO CALLBACK =====================
+    @PostMapping("/google-login")
+    public ResponseEntity<Customer> googleLogin(
+            @RequestParam String email,
+            @RequestParam String fullName) {
+
+        Customer customer = userServiceImpl.processGoogleLogin(email, fullName);
+
+        return ResponseEntity.ok(customer);
+    }
+
+    // ===================== COMPLETE REGISTRATION (SSO USER) =====================
+    @PutMapping("/complete-registration/{userId}")
+    public ResponseEntity<TokenResponse> completeRegistration(
+            @PathVariable int userId,
+            @RequestBody Customer customer) {
+
+        Customer updatedCustomer = userServiceImpl.completeRegistration(userId, customer);
+
+        String token = jwtUtil.generateToken(
+                updatedCustomer.getEmail(),
+                "ROLE_USER");
+
+        return ResponseEntity.ok(new TokenResponse(token));
+    }
+
+    // ===================== PROFILE =====================
+    @GetMapping("/{userId}")
+    public Customer viewProfile(@PathVariable int userId) {
+        return userService.getUserById(userId);
+    }
+
+    @PutMapping("/{userId}")
+    public Customer updateProfile(
+            @PathVariable int userId,
+            @RequestBody Customer customer) {
+
+        return userService.updateUser(userId, customer);
+    }
 }
-

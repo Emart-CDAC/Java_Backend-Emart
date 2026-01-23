@@ -1,30 +1,39 @@
 package com.example.services;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Service;
 
 import com.example.model.Customer;
 import com.example.repository.CustomerRepository;
 
-public class OAuthUserService 
-{
+@Service
+public class OAuthUserService {
 	@Autowired
-	private CustomerRepository customerrepository;
-	
-	public Customer savecustomer(OAuth2User oauthuser)
-	{
-		String email = oauthuser.getAttribute("email");
-		String name = oauthuser.getAttribute("name");
-		return customerrepository.findByEmail(email).orElseGet(() ->{
-			Customer c = new Customer();
-			c.setEmail(email);
-			c.setFullName(name);
-			
-			return customerrepository.save(c);
-		});
+	private CustomerRepository customerRepository;
+
+	public Customer findByEmail(String email) {
+		return customerRepository.findByEmail(email).orElse(null);
 	}
-	
-	
-	
+
+	public Customer saveCustomer(OAuth2User oauthUser) {
+
+		String email = oauthUser.getAttribute("email");
+
+		Customer existing = findByEmail(email);
+		if (existing != null) {
+			return existing;
+		}
+
+		Customer customer = new Customer();
+		customer.setEmail(email);
+		customer.setFullName(oauthUser.getAttribute("name"));
+		customer.setAuthProvider(com.example.model.AuthProvider.GOOGLE);
+		customer.setProfileCompleted(false);
+
+		return customerRepository.save(customer);
+	}
 
 }
