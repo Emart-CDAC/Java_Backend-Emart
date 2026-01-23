@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.example.model.Admin;
 import com.example.repository.AdminRepository;
 import com.example.security.JwtUtil;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -16,13 +17,16 @@ public class AdminServiceImpl implements AdminService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public String login(String email, String password) {
 
         Admin admin = adminRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Admin not found"));
 
-        if (!admin.getPassword().equals(password)) {
+        if (!passwordEncoder.matches(password, admin.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
 

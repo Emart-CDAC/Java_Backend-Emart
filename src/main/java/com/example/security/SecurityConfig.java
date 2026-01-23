@@ -36,20 +36,28 @@ public class SecurityConfig {
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                                .requestMatchers("/api/admin/login").permitAll() // Explicitly permit
+                                                                                                 // admin login
                                                 .requestMatchers(
                                                                 "/api/users/register",
                                                                 "/api/users/login",
                                                                 "/api/users/google-login",
                                                                 "/api/users/complete-registration/**",
                                                                 "/oauth2/**",
-                                                                "/login/**")
+                                                                "/login/**",
+                                                                "/api/admin/login")
                                                 .permitAll()
+                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
                                 .formLogin(form -> form.disable())
                                 .httpBasic(basic -> basic.disable())
                                 .exceptionHandling(exception -> exception
                                                 .authenticationEntryPoint((request, response, authException) -> {
-                                                        if (request.getRequestURI().startsWith("/api/")) {
+                                                        String requestURI = request.getRequestURI();
+                                                        // More robust check for API requests
+                                                        if (requestURI.startsWith("/api/")
+                                                                        || request.getHeader("Accept")
+                                                                                        .contains("application/json")) {
                                                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
                                                                                 "Unauthorized");
                                                         } else {

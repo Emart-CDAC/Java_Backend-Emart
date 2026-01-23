@@ -3,7 +3,8 @@ package com.example.util;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.example.model.Category;
 import com.example.model.Product;
@@ -13,55 +14,88 @@ import com.example.repository.SubCategoryRepository;
 
 public class ProductCSVHelper {
 
+    public static boolean isCSVFile(String filename) {
+        return filename != null && filename.toLowerCase().endsWith(".csv");
+    }
+
     public static List<Product> parseCSV(
             InputStream is,
             CategoryRepository categoryRepo,
-            SubCategoryRepository subCategoryRepo
-    ) {
+            SubCategoryRepository subCategoryRepo) {
 
         List<Product> products = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
 
-            br.readLine();
-
             String line;
+            boolean header = true;
+
             while ((line = br.readLine()) != null) {
+
+                if (header) {
+                    header = false;
+                    continue;
+                }
 
                 String[] data = line.split(",");
 
-                Product product = new Product();
-                product.setName(data[0]);
-                product.setNormalPrice(Double.parseDouble(data[1]));
-                product.setEcardPrice(Double.parseDouble(data[2]));
-                product.setAvailableQuantity(Integer.parseInt(data[3]));
-                product.setDescription(data[4]);
+                if (data.length < 10) {
+                    throw new RuntimeException("Invalid CSV row: " + line);
+                }
 
-                                String categoryName = data[5];
-                Category category = categoryRepo
-                        .findByCategoryNameIgnoreCase(categoryName)
-                        .orElseThrow(() ->
-                                new RuntimeException("Category not found: " + categoryName)
-                        );
+                String parentCategoryName = data[0].trim();
+                String childCategoryName = data[1].trim();
+                String brand = data[2].trim();
 
-                String brand = data[6];
+                // Parent category
+                Category parentCategory = categoryRepo
+                        .findByCategoryNameIgnoreCase(parentCategoryName)
+                        .orElseGet(() -> {
+                            Category c = new Category();
+                            c.setCategoryName(parentCategoryName);
+                            c.setParentCategory(null);
+                            return categoryRepo.save(c);
+                        });
+
+                // Child category
+                Category childCategory = categoryRepo
+                        .findByCategoryNameAndParentCategory(
+                                childCategoryName, parentCategory)
+                        .orElseGet(() -> {
+                            Category c = new Category();
+                            c.setCategoryName(childCategoryName);
+                            c.setParentCategory(parentCategory);
+                            return categoryRepo.save(c);
+                        });
+
+                // SubCategory = Brand
                 SubCategory subCategory = subCategoryRepo
-                        .findByCategoryAndBrandIgnoreCase(category, brand)
-                        .orElseThrow(() ->
-                                new RuntimeException("SubCategory not found for brand: " + brand)
-                        );
+                        .findByCategoryAndBrandIgnoreCase(childCategory, brand)
+                        .orElseGet(() -> {
+                            SubCategory sc = new SubCategory();
+                            sc.setCategory(childCategory);
+                            sc.setBrand(brand);
+                            return subCategoryRepo.save(sc);
+                        });
 
-                product.setSubCategory(subCategory);
+                // Product
+                Product p = new Product();
+                p.setName(data[3].trim());
+                p.setImageUrl(data[4].trim());
+                p.setNormalPrice(Double.parseDouble(data[5]));
+                p.setEcardPrice(Double.parseDouble(data[6]));
+                p.setAvailableQuantity(Integer.parseInt(data[7]));
+                p.setDescription(data[8].trim());
+                p.setStoreId(Integer.parseInt(data[9]));
+                p.setSubCategory(subCategory);
 
-       
-                products.add(product);
+                products.add(p);
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("CSV parse error: " + e.getMessage());
+            throw new RuntimeException("CSV parsing failed: " + e.getMessage());
         }
 
         return products;
     }
 }
-
