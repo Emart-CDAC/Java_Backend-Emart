@@ -1,6 +1,7 @@
 package com.example.repository;
 
 import java.util.List;
+
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,6 @@ public interface SubCategoryRepository extends JpaRepository<SubCategory, Intege
     List<SubCategory> findByCategoryCategoryId(int categoryId);
     Optional<SubCategory> findByCategoryAndBrand(Category category, String brand);
     Optional<SubCategory> findByCategoryAndBrandIgnoreCase(Category category, String brand);
+    Optional<SubCategory> findByBrandIgnoreCase(String brand);
+
 }
