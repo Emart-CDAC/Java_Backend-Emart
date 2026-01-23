@@ -1,47 +1,44 @@
 package com.example.model;
 
-
 import jakarta.persistence.*;
-
 
 @Entity
 @Table(name = "product")
 public class Product {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="product_id")
-    private int id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "product_id")
+	private int id;
 
-    @Column(name = "product_name", nullable = false, length = 100)
-    private String name;
-    
-    @Column(name = "product_image_url", length = 255)
-    private String imageUrl;
+	@Column(name = "product_name", nullable = false, length = 100)
+	private String name;
 
-    @Column(name = "normal_price", nullable = false)
-    private double normalPrice;
+	@Column(name = "product_image_url", length = 255)
+	private String imageUrl;
 
-    @Column(name = "ecard_price")
-    private Double ecardPrice;
+	@Column(name = "normal_price", nullable = false)
+	private double normalPrice;
 
-    @Column(name = "available_quantity")
-    private int availableQuantity;
+	@Column(name = "ecard_price")
+	private Double ecardPrice;
 
-    @Column(name = "description")
-    private String description;
+	@Column(name = "available_quantity")
+	private int availableQuantity;
 
-    
- // FK → SubCategory
-    @ManyToOne
-    @JoinColumn(name = "subcategory_id")
-    private SubCategory subCategory;
+	@Column(name = "description")
+	private String description;
 
-    // FK → Store (kept simple as ID)
-    @Column(name = "store_id")
-    private int storeId;
+	// FK → SubCategory
+	@ManyToOne
+	@JoinColumn(name = "subcategory_id")
+	private SubCategory subCategory;
 
-    public int getId() {
+	// FK → Store (kept simple as ID)
+	@Column(name = "store_id")
+	private int storeId;
+
+	public int getId() {
 		return id;
 	}
 
@@ -114,9 +111,6 @@ public class Product {
 	}
 
 	public Product() {
-    }
+	}
 
-   
-
-    
 }

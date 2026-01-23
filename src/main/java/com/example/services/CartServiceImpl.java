@@ -15,116 +15,104 @@ import com.example.repository.CustomerRepository;
 import com.example.repository.ProductRepository;
 
 @Service
-public class CartServiceImpl implements CartService 
-{
+public class CartServiceImpl implements CartService {
 	@Autowired
-    CartRepository cartRepository;
+	CartRepository cartRepository;
 	@Autowired
-    CartItemRepository cartItemRepository;
+	CartItemRepository cartItemRepository;
 	@Autowired
-    CustomerRepository customerRepository;
+	CustomerRepository customerRepository;
 	@Autowired
-     ProductRepository productRepository;
+	ProductRepository productRepository;
 
-  
-   
+	@Override
+	public CartItems addToCart(int userId, int productId, int quantity) {
 
-    @Override
-    public CartItems addToCart(int userId, int productId, int quantity) {
+		if (quantity <= 0) {
+			throw new IllegalArgumentException("Quantity must be greater than zero");
+		}
 
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than zero");
-        }
+		Customer customer = customerRepository.findById(userId)
+				.orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        Customer customer = customerRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+		Cart cart = cartRepository.findByCustomer(customer).orElseGet(() -> {
+			Cart c = new Cart();
+			c.setCustomer(customer);
+			c.setTotalAmount(0.0);
+			return cartRepository.save(c);
+		});
 
-        Cart cart = cartRepository.findByCustomer(customer)
-                .orElseGet(() -> {
-                    Cart c = new Cart();
-                    c.setCustomer(customer);
-                    c.setTotalAmount(0.0);
-                    return cartRepository.save(c);
-                });
+		Product product = productRepository.findById(productId)
+				.orElseThrow(() -> new RuntimeException("Product not found"));
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+		CartItems item = cartItemRepository.findByCartAndProduct(cart, product).orElse(new CartItems());
 
-        CartItems item = cartItemRepository
-                .findByCartAndProduct(cart, product)
-                .orElse(new CartItems());
+		item.setCart(cart);
+		item.setProduct(product);
+		item.setQuantity(item.getQuantity() + quantity);
 
-        item.setCart(cart);
-        item.setProduct(product);
-        item.setQuantity(item.getQuantity() + quantity);
+		double subtotal = product.getNormalPrice() * item.getQuantity();
+		item.setSubtotal(subtotal);
+		item.setTotalPrice(subtotal);
 
-        
-        double subtotal = product.getNormalPrice() * item.getQuantity();
-        item.setSubtotal(subtotal);
-        item.setTotalPrice(subtotal);
+		CartItems savedItem = cartItemRepository.save(item);
+		updateCartTotal(cart);
 
-        CartItems savedItem = cartItemRepository.save(item);
-        updateCartTotal(cart);
+		return savedItem;
+	}
 
-        return savedItem;
-    }
+	@Override
+	public void removeFromCart(int cartItemId) {
 
-    @Override
-    public void removeFromCart(int cartItemId) {
+		CartItems item = cartItemRepository.findById(cartItemId)
+				.orElseThrow(() -> new RuntimeException("Cart item not found"));
 
-        CartItems item = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+		Cart cart = item.getCart();
+		cartItemRepository.delete(item);
 
-        Cart cart = item.getCart();
-        cartItemRepository.delete(item);
+		updateCartTotal(cart);
+	}
 
-        updateCartTotal(cart);
-    }
+	@Override
+	public CartItems updateQuantity(int cartItemId, int quantity) {
 
-    @Override
-    public CartItems updateQuantity(int cartItemId, int quantity) {
+		if (quantity <= 0) {
+			throw new IllegalArgumentException("Quantity must be greater than zero");
+		}
 
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than zero");
-        }
+		CartItems item = cartItemRepository.findById(cartItemId)
+				.orElseThrow(() -> new RuntimeException("Cart item not found"));
 
-        CartItems item = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+		item.setQuantity(quantity);
 
-        item.setQuantity(quantity);
+		double subtotal = item.getProduct().getNormalPrice() * quantity;
+		item.setSubtotal(subtotal);
+		item.setTotalPrice(subtotal);
 
-        
-        double subtotal = item.getProduct().getNormalPrice() * quantity;
-        item.setSubtotal(subtotal);
-        item.setTotalPrice(subtotal);
+		CartItems updatedItem = cartItemRepository.save(item);
+		updateCartTotal(item.getCart());
 
-        CartItems updatedItem = cartItemRepository.save(item);
-        updateCartTotal(item.getCart());
+		return updatedItem;
+	}
 
-        return updatedItem;
-    }
+	@Override
+	public List<CartItems> viewCart(int userId) {
 
-    @Override
-    public List<CartItems> viewCart(int userId) {
+		Customer customer = customerRepository.findById(userId)
+				.orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        Customer customer = customerRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+		Cart cart = cartRepository.findByCustomer(customer).orElseThrow(() -> new RuntimeException("Cart not found"));
 
-        Cart cart = cartRepository.findByCustomer(customer)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+		return cartItemRepository.findByCart(cart);
+	}
 
-        return cartItemRepository.findByCart(cart);
-    }
+	private void updateCartTotal(Cart cart) {
 
-    private void updateCartTotal(Cart cart) {
+		List<CartItems> items = cartItemRepository.findByCart(cart);
 
-        List<CartItems> items = cartItemRepository.findByCart(cart);
+		double total = items.stream().mapToDouble(CartItems::getTotalPrice).sum();
 
-        double total = items.stream()
-                .mapToDouble(CartItems::getTotalPrice)
-                .sum();
-
-        cart.setTotalAmount(total);
-        cartRepository.save(cart);
-    }
+		cart.setTotalAmount(total);
+		cartRepository.save(cart);
+	}
 }

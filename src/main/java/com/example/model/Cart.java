@@ -7,17 +7,17 @@ import java.math.BigDecimal;
 @Table(name = "Cart")
 public class Cart {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Cart_Id")
-    private int cartId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "Cart_Id")
+	private int cartId;
 
-    @ManyToOne
-    @JoinColumn(name = "User_Id")
-    private Customer customer;
+	@ManyToOne
+	@JoinColumn(name = "User_Id")
+	private Customer customer;
 
-    @Column(name = "Total_Amount")
-    private double totalAmount;
+	@Column(name = "Total_Amount")
+	private double totalAmount;
 
 	public int getCartId() {
 		return cartId;
@@ -43,5 +43,4 @@ public class Cart {
 		this.totalAmount = totalAmount;
 	}
 
-    
 }
