@@ -33,7 +33,7 @@ public class InvoiceServiceImp implements InvoiceService {
 		invoice.setCustomer(order.getCustomer());
 		invoice.setOrderDate(order.getOrderDate());
 
-		invoice.setDiscountAmount(7); // temporary
+		invoice.setDiscountAmount(order.getTotalAmount().doubleValue()); // temporary
 		invoice.setTaxAmount(0.0);
 
 		if (order.getTotalAmount() != null) {

@@ -13,78 +13,99 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.List;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 public class SecurityConfig {
 
-        @Autowired
-        private OAuthSuccessHandler oauthSuccessHandler;
+    @Autowired
+    private OAuthSuccessHandler oauthSuccessHandler;
 
-        @Autowired
-        private JwtAuthFilter jwtAuthFilter;
+    @Autowired
+    private JwtAuthFilter jwtAuthFilter;
 
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-                http
-                                .csrf(csrf -> csrf.disable())
-                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                                .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                                .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                                .requestMatchers("/api/admin/login").permitAll() // Explicitly permit
-                                                                                                 // admin login
-                                                .requestMatchers(
-                                                                "/api/users/register",
-                                                                "/api/users/login",
-                                                                "/api/users/google-login",
-                                                                "/api/users/complete-registration/**",
-                                                                "/oauth2/**",
-                                                                "/login/**",
-                                                                "/api/admin/login")
-                                                .permitAll()
-                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                                                .anyRequest().authenticated())
-                                .formLogin(form -> form.disable())
-                                .httpBasic(basic -> basic.disable())
-                                .exceptionHandling(exception -> exception
-                                                .authenticationEntryPoint((request, response, authException) -> {
-                                                        String requestURI = request.getRequestURI();
-                                                        // More robust check for API requests
-                                                        if (requestURI.startsWith("/api/")
-                                                                        || request.getHeader("Accept")
-                                                                                        .contains("application/json")) {
-                                                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                                                                                "Unauthorized");
-                                                        } else {
-                                                                response.sendRedirect("/oauth2/authorization/google");
-                                                        }
-                                                }))
-                                .oauth2Login(oauth2 -> oauth2
-                                                .successHandler(oauthSuccessHandler))
-                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(auth -> auth
 
-                return http.build();
-        }
+                // ✅ Allow preflight
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-        @Bean
-        public CorsConfigurationSource corsConfigurationSource() {
-                CorsConfiguration configuration = new CorsConfiguration();
-                configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
-                configuration.setAllowCredentials(true);
-                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-                source.registerCorsConfiguration("/**", configuration);
-                return source;
-        }
+                // ✅ Public APIs
+                .requestMatchers(
+                    "/api/users/register",
+                    "/api/users/login",
+                    "/api/users/google-login",
+                    "/api/users/complete-registration/**",
+                    "/api/admin/login",
+                    "/oauth2/**",
+                    "/login/**"
+                ).permitAll()
 
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder();
-        }
+                // ✅ Admin APIs
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                // ✅ Customer APIs
+                .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+
+                // ✅ Everything else secured
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable())
+            .exceptionHandling(exception ->
+                exception.authenticationEntryPoint((request, response, authException) -> {
+                    String uri = request.getRequestURI();
+                    String accept = request.getHeader("Accept");
+
+                    if (uri.startsWith("/api/")
+                        || (accept != null && accept.contains("application/json"))) {
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                    } else {
+                        response.sendRedirect("/oauth2/authorization/google");
+                    }
+                })
+            )
+            .oauth2Login(oauth2 ->
+                oauth2.successHandler(oauthSuccessHandler)
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedMethods(
+            Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        );
+        configuration.setAllowedHeaders(
+            Arrays.asList("Authorization", "Content-Type", "Cache-Control", "Accept")
+        );
+        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

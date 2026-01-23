@@ -1,9 +1,7 @@
 package com.example.mapper;
 
-import com.example.dto.ProductDTO;
 import com.example.dto.ProductRequestDTO;
 import com.example.dto.ProductResponseDTO;
-import com.example.model.Category;
 import com.example.model.Product;
 import com.example.model.SubCategory;
 
