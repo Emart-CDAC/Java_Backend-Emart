@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.example"})
+@ComponentScan(basePackages = { "com.example" })
 @EnableJpaRepositories(basePackages = "com.example.repository")
 @EntityScan(basePackages = "com.example.model")
 public class EmartCdacApplication {
