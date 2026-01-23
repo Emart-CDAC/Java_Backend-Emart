@@ -6,34 +6,34 @@ import jakarta.persistence.*;
 @Table(name = "Address")
 public class Address {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Address_Id")
-    private int addressId;
-    @ManyToOne
-    @JoinColumn(name = "User_id")
-    private Customer customer;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "Address_Id")
+	private int addressId;
+	@ManyToOne
+	@JoinColumn(name = "User_id")
+	private Customer customer;
 
-    @Column(name = "Town", nullable = false)
-    private String town;
+	@Column(name = "Town", nullable = true)
+	private String town;
 
-    @Column(name = "State", nullable = false)
-    private String state;
+	@Column(name = "State", nullable = true)
+	private String state;
 
-    @Column(name = "Country", nullable = false)
-    private String country;
+	@Column(name = "Country", nullable = true)
+	private String country;
 
-    @Column(name = "City", nullable = false)
-    private String city;
+	@Column(name = "City", nullable = true)
+	private String city;
 
-    @Column(name = "Pincode", nullable = false)
-    private String pincode;
+	@Column(name = "Pincode", nullable = true)
+	private String pincode;
 
-    @Column(name = "Landmark")
-    private String landmark;
+	@Column(name = "Landmark")
+	private String landmark;
 
-    @Column(name = "HouseNumber")
-    private String houseNumber;
+	@Column(name = "HouseNumber")
+	private String houseNumber;
 
 	public int getAddressId() {
 		return addressId;
@@ -98,14 +98,13 @@ public class Address {
 	public void setHouseNumber(String houseNumber) {
 		this.houseNumber = houseNumber;
 	}
+
 	public Customer getCustomer() {
-        return customer;
-    }
+		return customer;
+	}
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-
-    
+	public void setCustomer(Customer customer) {
+		this.customer = customer;
+	}
 
 }
