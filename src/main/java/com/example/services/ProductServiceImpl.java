@@ -7,9 +7,9 @@ import com.example.repository.ProductRepository;
 import com.example.repository.SubCategoryRepository;
 import com.example.util.ProductCSVHelper;
 
+import jakarta.transaction.Transactional;
 
 import java.util.List;
-
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,7 +54,6 @@ public class ProductServiceImpl implements ProductService {
         return ProductMapper.toDTO(product);
     }
 
-   
     @Override
     public ProductResponseDTO createProduct(ProductRequestDTO dto) {
 
@@ -67,7 +66,6 @@ public class ProductServiceImpl implements ProductService {
         return ProductMapper.toDTO(saved);
     }
 
-   
     @Override
     public ProductResponseDTO updateProduct(int id, ProductRequestDTO dto) {
 
@@ -91,6 +89,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void uploadProducts(MultipartFile file) {
 
         if (!file.getOriginalFilename().endsWith(".csv")) {
@@ -101,8 +100,7 @@ public class ProductServiceImpl implements ProductService {
             List<Product> products = ProductCSVHelper.parseCSV(
                     file.getInputStream(),
                     categoryRepo,
-                    subCategoryRepo
-            );
+                    subCategoryRepo);
 
             productRepository.saveAll(products);
 
