@@ -1,69 +1,158 @@
 package com.example.services;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.model.AuthProvider;
 import com.example.model.Customer;
 import com.example.repository.CustomerRepository;
 
 @Service
 public class UserServiceImpl implements UserService {
 
-	@Autowired
-	private CustomerRepository customerRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
-	@Override
-	public Customer login(String email, String password) {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-		Customer customer = customerRepository.findByEmail(email)
-				.orElseThrow(() -> new RuntimeException("User not found"));
+    // ===================== LOGIN (LOCAL ONLY) =====================
+    @Override
+    public Customer login(String email, String password) {
 
-		if (!customer.getPassword().equals(password)) {
-			throw new RuntimeException("Invalid credentials");
-		}
+        Customer customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("No account found with this email"));
 
-		return customer;
-	}
+        if (customer.getAuthProvider() == AuthProvider.GOOGLE) {
+            throw new RuntimeException("This email is registered via Google SSO. Please use 'Log in with Google'.");
+        }
 
-	@Override
-	public Customer registerUser(Customer customer) {
+        if (customer.getPassword() == null || !passwordEncoder.matches(password, customer.getPassword())) {
+            throw new RuntimeException("Invalid password. Please try again.");
+        }
 
-		return customerRepository.save(customer);
-	}
+        return customer;
+    }
 
-	@Override
-	public Customer getUserById(int userId) {
-		return customerRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-	}
+    // ===================== NORMAL REGISTER (LOCAL) =====================
+    @Override
+    public Customer registerUser(Customer customer) {
 
-	@Override
-	public Customer updateUser(int userId, Customer updatedCustomer) {
+        Optional<Customer> existing = customerRepository.findByEmail(customer.getEmail());
+        if (existing.isPresent()) {
+            if (existing.get().getAuthProvider() == AuthProvider.GOOGLE) {
+                throw new RuntimeException("This email is already registered via Google SSO");
+            } else {
+                throw new RuntimeException("This email is already registered. Please login.");
+            }
+        }
 
-		Customer existingCustomer = customerRepository.findById(userId)
-				.orElseThrow(() -> new RuntimeException("User not found"));
+        customer.setAuthProvider(AuthProvider.LOCAL);
+        customer.setProfileCompleted(true);
 
-		existingCustomer.setFullName(updatedCustomer.getFullName());
-		existingCustomer.setEmail(updatedCustomer.getEmail());
-		existingCustomer.setMobile(updatedCustomer.getMobile());
-		existingCustomer.setBirthDate(updatedCustomer.getBirthDate());
-		existingCustomer.setInterests(updatedCustomer.getInterests());
+        if (customer.getPassword() != null) {
+            customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+        }
 
-		return customerRepository.save(existingCustomer);
-	}
+        if (customer.getAddress() != null) {
+            customer.getAddress().setCustomer(customer);
+        }
 
-	@Override
-	public String changePassword(int userId, String oldPassword, String newPassword) {
+        return customerRepository.save(customer);
+    }
 
-		Customer customer = customerRepository.findById(userId)
-				.orElseThrow(() -> new RuntimeException("User not found"));
+    // ===================== GOOGLE SSO ENTRY =====================
+    public Customer processGoogleLogin(String email, String fullName) {
 
-		if (!customer.getPassword().equals(oldPassword)) {
-			throw new RuntimeException("Old password is incorrect");
-		}
+        Optional<Customer> existing = customerRepository.findByEmail(email);
 
-		customer.setPassword(newPassword);
-		customerRepository.save(customer);
+        if (existing.isPresent()) {
+            Customer customer = existing.get();
+            if (customer.getAuthProvider() == AuthProvider.LOCAL) {
+                throw new RuntimeException(
+                        "This email is registered with a password. Please login using email/password.");
+            }
+            return customer;
+        }
 
-		return "Password updated successfully";
-	}
+        Customer customer = new Customer();
+        customer.setEmail(email);
+        customer.setFullName(fullName);
+        customer.setAuthProvider(AuthProvider.GOOGLE);
+        customer.setProfileCompleted(false);
+        customer.setPassword(null);
+
+        return customerRepository.save(customer);
+    }
+
+    // ===================== COMPLETE REGISTRATION (SSO USER) =====================
+    public Customer completeRegistration(int userId, Customer data) {
+
+        Customer customer = customerRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (customer.getAuthProvider() != AuthProvider.GOOGLE) {
+            throw new RuntimeException("Registration completion is only for Google users");
+        }
+
+        customer.setFullName(data.getFullName());
+        customer.setMobile(data.getMobile());
+        customer.setBirthDate(data.getBirthDate());
+        customer.setInterests(data.getInterests());
+        customer.setPromotionalEmail(data.isPromotionalEmail());
+
+        if (data.getAddress() != null) {
+            data.getAddress().setCustomer(customer);
+            customer.setAddress(data.getAddress());
+        }
+
+        customer.setProfileCompleted(true);
+
+        return customerRepository.save(customer);
+    }
+
+    // ===================== PROFILE =====================
+    @Override
+    public Customer getUserById(int userId) {
+        return customerRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @Override
+    public Customer updateUser(int userId, Customer updatedCustomer) {
+
+        Customer existingCustomer = customerRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        existingCustomer.setFullName(updatedCustomer.getFullName());
+        existingCustomer.setMobile(updatedCustomer.getMobile());
+        existingCustomer.setBirthDate(updatedCustomer.getBirthDate());
+        existingCustomer.setInterests(updatedCustomer.getInterests());
+
+        return customerRepository.save(existingCustomer);
+    }
+
+    // ===================== PASSWORD CHANGE (LOCAL ONLY) =====================
+    @Override
+    public String changePassword(int userId, String oldPassword, String newPassword) {
+
+        Customer customer = customerRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (customer.getAuthProvider() == AuthProvider.GOOGLE) {
+            throw new RuntimeException("Password change not allowed for Google users");
+        }
+
+        if (!passwordEncoder.matches(oldPassword, customer.getPassword())) {
+            throw new RuntimeException("Old password is incorrect");
+        }
+
+        customer.setPassword(passwordEncoder.encode(newPassword));
+        customerRepository.save(customer);
+
+        return "Password updated successfully";
+    }
 }
