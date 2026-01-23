@@ -49,9 +49,18 @@ public class JwtUtil {
 	}
 
 	public String generateToken(String email, String role) {
-		return Jwts.builder().setSubject(email).claim("role", role).setIssuer("EmartAuthService")
-				.setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + 1 * 60 * 60 * 1000))
-				.signWith(getSigningKey()).compact();
+		
+		if (!role.startsWith("ROLE_")) {
+	        role = "ROLE_" + role;
+	    }
+		
+		return Jwts.builder().setSubject(email)
+				.claim("role", role)
+				.setIssuer("EmartAuthService")
+				.setIssuedAt(new Date())
+				.setExpiration(new Date(System.currentTimeMillis() + 1 * 60 * 60 * 1000))
+				.signWith(getSigningKey())
+				.compact();
 	}
 
 }
