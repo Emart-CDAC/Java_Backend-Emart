@@ -21,91 +21,85 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    @Autowired
-    private OAuthSuccessHandler oauthSuccessHandler;
+        @Autowired
+        private OAuthSuccessHandler oauthSuccessHandler;
 
-    @Autowired
-    private JwtAuthFilter jwtAuthFilter;
+        @Autowired
+        private JwtAuthFilter jwtAuthFilter;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authorizeHttpRequests(auth -> auth
+                http
+                                .csrf(csrf -> csrf.disable())
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
 
-                // ✅ Allow preflight
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                                // ✅ Allow preflight
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // ✅ Public APIs
-                .requestMatchers(
-                    "/api/users/register",
-                    "/api/users/login",
-                    "/api/users/google-login",
-                    "/api/users/complete-registration/**",
-                    "/api/admin/login",
-                    "/oauth2/**",
-                    "/login/**"
-                ).permitAll()
+                                                // ✅ Public APIs
+                                                .requestMatchers(
+                                                                "/api/users/register",
+                                                                "/api/users/login",
+                                                                "/api/users/google-login",
+                                                                "/api/users/complete-registration/**",
+                                                                "/api/admin/login",
+                                                                "/oauth2/**",
+                                                                "/login/**")
+                                                .permitAll()
 
-                // ✅ Admin APIs
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                                // ✅ Admin APIs
+                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                // ✅ Customer APIs
-                .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+                                                // ✅ Customer APIs
+                                                .requestMatchers("/api/customer/**").hasRole("USER")
 
-                // ✅ Everything else secured
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form.disable())
-            .httpBasic(basic -> basic.disable())
-            .exceptionHandling(exception ->
-                exception.authenticationEntryPoint((request, response, authException) -> {
-                    String uri = request.getRequestURI();
-                    String accept = request.getHeader("Accept");
+                                                // ✅ Everything else secured
+                                                .anyRequest().authenticated())
+                                .formLogin(form -> form.disable())
+                                .httpBasic(basic -> basic.disable())
+                                .exceptionHandling(exception -> exception
+                                                .authenticationEntryPoint((request, response, authException) -> {
+                                                        String uri = request.getRequestURI();
+                                                        String accept = request.getHeader("Accept");
 
-                    if (uri.startsWith("/api/")
-                        || (accept != null && accept.contains("application/json"))) {
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-                    } else {
-                        response.sendRedirect("/oauth2/authorization/google");
-                    }
-                })
-            )
-            .oauth2Login(oauth2 ->
-                oauth2.successHandler(oauthSuccessHandler)
-            )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                                                        if (uri.startsWith("/api/")
+                                                                        || (accept != null && accept.contains(
+                                                                                        "application/json"))) {
+                                                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                                                                                "Unauthorized");
+                                                        } else {
+                                                                response.sendRedirect("/oauth2/authorization/google");
+                                                        }
+                                                }))
+                                .oauth2Login(oauth2 -> oauth2.successHandler(oauthSuccessHandler))
+                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
 
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(
-            Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")
-        );
-        configuration.setAllowedHeaders(
-            Arrays.asList("Authorization", "Content-Type", "Cache-Control", "Accept")
-        );
-        configuration.setExposedHeaders(List.of("Authorization"));
-        configuration.setAllowCredentials(true);
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+                configuration.setAllowedMethods(
+                                Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                configuration.setAllowedHeaders(
+                                Arrays.asList("Authorization", "Content-Type", "Cache-Control", "Accept"));
+                configuration.setExposedHeaders(List.of("Authorization"));
+                configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 }
