@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.example.dto.LoginRequest;
+import com.example.dto.TokenResponse;
 
 import com.example.services.AdminService;
 
@@ -26,37 +27,4 @@ public class AdminController {
 		return ResponseEntity.ok(new TokenResponse(token));
 	}
 
-}
-
-class LoginRequest {
-	private String email;
-	private String password;
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-}
-
-class TokenResponse {
-	private String accessToken;
-
-	public TokenResponse(String accessToken) {
-		this.accessToken = accessToken;
-	}
-
-	public String getAccessToken() {
-		return accessToken;
-	}
 }
