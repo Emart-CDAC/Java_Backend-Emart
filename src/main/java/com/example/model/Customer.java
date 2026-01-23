@@ -1,6 +1,7 @@
 package com.example.model;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,48 +13,55 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Table(name = "Customer")
 public class Customer implements UserDetails{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "User_id")
-    private int userId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "User_id")
+	private int userId;
 
-    @Column(name = "Full_Name", nullable = false)
-    private String fullName;
+	@Column(name = "Full_Name", nullable = false)
+	private String fullName;
 
-    @Column(name = "Email", nullable = false, unique = true)
-    private String email;
+	@Column(name = "Email", nullable = false, unique = true)
+	private String email;
 
-    @Column(name = "Password", nullable = false)
-    private String password;
+	@Column(name = "Password", nullable = true)
+	private String password;
 
-    @Column(name = "Mobile")
-    private String mobile;
+	@Column(name = "Mobile")
+	private String mobile;
 
-    @ManyToOne
-    @JoinColumn(name = "Address_Id")
-    private Address address;
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "Address_Id")
+	private Address address;
 
-    @Column(name = "Epoints")
-    private int epoints;
+	@Column(name = "Epoints")
+	private int epoints;
 
-    @ManyToOne
-    @JoinColumn(name = "CardHolder_id")
-    private EmartCard emartCard;
-   
+	@ManyToOne
+	@JoinColumn(name = "CardHolder_id")
+	private EmartCard emartCard;
+
 	@Column(name = "BirthDate")
-    private LocalDate birthDate;
+	private LocalDate birthDate;
 
-    @Column(name = "Interests")
-    private String interests;
+	@Column(name = "Interests")
+	private String interests;
 
-    @Column(name = "Promotional_Email")
-    private boolean promotionalEmail;
+	@Column(name = "Promotional_Email")
+	private boolean promotionalEmail;
 
     @Column(name = "Membership_Number", unique = true)
     private String membershipNumber;
     
     @Column(name="role")
-    private String role = "role";
+    private String role = "USER";
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Auth_Provider", nullable = false)
+    private AuthProvider authProvider;
+    
+    @Column(name = "Profile_Completed")
+    private Boolean profileCompleted; // Changed to Boolean wrapper to handle null
     
     public String getRole() {
 		return role;
@@ -61,6 +69,15 @@ public class Customer implements UserDetails{
 
 	public void setRole(String role) {
 		this.role = role;
+	}
+	
+
+	public Boolean isProfileCompleted() {
+		return profileCompleted != null ? profileCompleted : false;
+	}
+
+	public void setProfileCompleted(Boolean profileCompleted) {
+		this.profileCompleted = profileCompleted;
 	}
 
 	public int getUserId() {
@@ -175,6 +192,11 @@ public class Customer implements UserDetails{
 	}
 	
 	
-	
-	
+	public AuthProvider getAuthProvider() {
+		return authProvider;
+	}
+
+	public void setAuthProvider(AuthProvider authProvider) {
+		this.authProvider = authProvider;
+	}
 }
