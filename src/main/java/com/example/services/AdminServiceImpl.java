@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.example.model.Admin;
 import com.example.repository.AdminRepository;
 import com.example.security.JwtUtil;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -17,7 +18,6 @@ public class AdminServiceImpl implements AdminService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // ✅ ADD THIS
     @Autowired
     private PasswordEncoder passwordEncoder;
 
