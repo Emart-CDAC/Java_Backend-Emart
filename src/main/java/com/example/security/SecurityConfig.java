@@ -35,8 +35,9 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+//                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers(
+                                                				"/api/admin/login", 
                                                                 "/api/users/register",
                                                                 "/api/users/login",
                                                                 "/api/users/google-login",
