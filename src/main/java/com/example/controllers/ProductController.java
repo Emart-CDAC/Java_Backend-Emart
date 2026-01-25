@@ -17,69 +17,62 @@ import java.util.Optional;
 @RequestMapping("/api/products")
 public class ProductController {
 
-    @Autowired
-    private ProductRepository productRepository;
-    
-    @Autowired
-    private ProductService productService;
+	@Autowired
+	private ProductRepository productRepository;
 
-    
-    @GetMapping
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
-    }
+	@Autowired
+	private ProductService productService;
 
-    
-    @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable int id) {
-        Optional<Product> product = productRepository.findById(id);
-        return product.map(ResponseEntity::ok)
-                      .orElseGet(() -> ResponseEntity.notFound().build());
-    }
+	@GetMapping
+	public List<Product> getAllProducts() {
+		return productRepository.findAll();
+	}
 
-   
-    @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-        Product savedProduct = productRepository.save(product);
-        return ResponseEntity.ok(savedProduct);
-    }
+	@GetMapping("/{id}")
+	public ResponseEntity<Product> getProductById(@PathVariable int id) {
+		Optional<Product> product = productRepository.findById(id);
+		return product.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+	}
 
-   
-    @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(
-            @PathVariable int id,
-            @RequestBody Product updatedProduct) {
+	@PostMapping
+	public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+		Product savedProduct = productRepository.save(product);
+		return ResponseEntity.ok(savedProduct);
+	}
 
-        Optional<Product> existingProduct = productRepository.findById(id);
+	@PutMapping("/{id}")
+	public ResponseEntity<Product> updateProduct(@PathVariable int id, @RequestBody Product updatedProduct) {
 
-        if (existingProduct.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+		Optional<Product> existingProduct = productRepository.findById(id);
 
-        Product product = existingProduct.get();
-        product.setName(updatedProduct.getName());
-        product.setImageUrl(updatedProduct.getImageUrl());
-        product.setNormalPrice(updatedProduct.getNormalPrice());
-        product.setEcardPrice(updatedProduct.getEcardPrice());
-        product.setAvailableQuantity(updatedProduct.getAvailableQuantity());
-        product.setDescription(updatedProduct.getDescription());
-        product.setSubCategory(updatedProduct.getSubCategory());
-        product.setStoreId(updatedProduct.getStoreId());
+		if (existingProduct.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
 
-        return ResponseEntity.ok(productRepository.save(product));
-    }
+		Product product = existingProduct.get();
+		product.setName(updatedProduct.getName());
+		product.setImageUrl(updatedProduct.getImageUrl());
+		product.setNormalPrice(updatedProduct.getNormalPrice());
+		product.setEcardPrice(updatedProduct.getEcardPrice());
+		product.setAvailableQuantity(updatedProduct.getAvailableQuantity());
+		product.setDescription(updatedProduct.getDescription());
+		product.setSubCategory(updatedProduct.getSubCategory());
+		product.setStoreId(updatedProduct.getStoreId());
 
-   
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable int id) {
-        if (!productRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        productRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-    @GetMapping("/search")
-    public List<ProductResponseDTO> search(@RequestParam String q) {
-        return productService.searchProducts(q);
-    }
+		return ResponseEntity.ok(productRepository.save(product));
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteProduct(@PathVariable int id) {
+		if (!productRepository.existsById(id)) {
+			return ResponseEntity.notFound().build();
+		}
+		productRepository.deleteById(id);
+		return ResponseEntity.noContent().build();
+	}
+
+	@GetMapping("/search")
+	public List<ProductResponseDTO> search(@RequestParam String q) {
+		return productService.searchProducts(q);
+	}
 }

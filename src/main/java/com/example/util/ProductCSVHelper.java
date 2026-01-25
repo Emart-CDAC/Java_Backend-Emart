@@ -40,14 +40,14 @@ public class ProductCSVHelper {
                 String[] data = line.split(",");
 
                 if (data.length < 10) {
-                    throw new RuntimeException("Invalid CSV format: " + line);
+                    throw new RuntimeException("Invalid CSV row: " + line);
                 }
 
                 String parentCategoryName = data[0].trim();
-                String childCategoryName  = data[1].trim();
-                String brand              = data[2].trim();
+                String childCategoryName = data[1].trim();
+                String brand = data[2].trim();
 
-                // 🔹 1. Parent Category (Electronics, Fashion, etc.)
+                // Parent category
                 Category parentCategory = categoryRepo
                         .findByCategoryNameIgnoreCase(parentCategoryName)
                         .orElseGet(() -> {
@@ -57,12 +57,10 @@ public class ProductCSVHelper {
                             return categoryRepo.save(c);
                         });
 
-                // 🔹 2. Child Category (Camera, TV, Mobile, etc.)
+                // Child category
                 Category childCategory = categoryRepo
                         .findByCategoryNameAndParentCategory(
-                                childCategoryName,
-                                parentCategory
-                        )
+                                childCategoryName, parentCategory)
                         .orElseGet(() -> {
                             Category c = new Category();
                             c.setCategoryName(childCategoryName);
@@ -70,7 +68,7 @@ public class ProductCSVHelper {
                             return categoryRepo.save(c);
                         });
 
-                // 🔹 3. SubCategory = Brand
+                // SubCategory = Brand
                 SubCategory subCategory = subCategoryRepo
                         .findByCategoryAndBrandIgnoreCase(childCategory, brand)
                         .orElseGet(() -> {
@@ -80,7 +78,7 @@ public class ProductCSVHelper {
                             return subCategoryRepo.save(sc);
                         });
 
-                // 🔹 4. Product
+                // Product
                 Product p = new Product();
                 p.setName(data[3].trim());
                 p.setImageUrl(data[4].trim());

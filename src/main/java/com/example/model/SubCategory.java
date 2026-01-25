@@ -6,20 +6,20 @@ import jakarta.persistence.*;
 @Table(name = "Sub_Category")
 public class SubCategory {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SubCategory_id")
-    private int subCategoryId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "SubCategory_id")
+	private int subCategoryId;
 
-    @ManyToOne
-    @JoinColumn(name = "Category_id", nullable = false)
-    private Category category;
+	@ManyToOne
+	@JoinColumn(name = "Category_id", nullable = false)
+	private Category category;
 
-    @Column(name = "Brand")
-    private String brand;
+	@Column(name = "Brand")
+	private String brand;
 
-    @Column(name = "Sponsors")
-    private boolean sponsors;
+	@Column(name = "Sponsors")
+	private boolean sponsors;
 
 	public int getSubCategoryId() {
 		return subCategoryId;
@@ -52,6 +52,4 @@ public class SubCategory {
 	public void setSponsors(boolean sponsors) {
 		this.sponsors = sponsors;
 	}
-
-    
 }

@@ -6,17 +6,17 @@ import jakarta.persistence.*;
 @Table(name = "Category")
 public class Category {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Category_id")
-    private int categoryId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "Category_id")
+	private int categoryId;
 
-    @Column(name = "Category_Name")
-    private String categoryName;
+	@Column(name = "Category_Name")
+	private String categoryName;
 
-    @ManyToOne
-    @JoinColumn(name = "Parent_category_id")
-    private Category parentCategory;
+	@ManyToOne
+	@JoinColumn(name = "Parent_category_id")
+	private Category parentCategory;
 
 	public int getCategoryId() {
 		return categoryId;
@@ -41,7 +41,4 @@ public class Category {
 	public void setParentCategory(Category parentCategory) {
 		this.parentCategory = parentCategory;
 	}
-
-   
-    
 }
