@@ -46,27 +46,15 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
                 return;
             }
 
-            if (!existingUser.isProfileCompleted()) {
-                // Return to registration to complete profile
-                response.sendRedirect("http://localhost:5173/register" +
-                        "?email=" + URLEncoder.encode(email, StandardCharsets.UTF_8) +
-                        "&name=" + URLEncoder.encode(name, StandardCharsets.UTF_8) +
-                        "&userId=" + existingUser.getUserId());
-                return;
-            }
-
-            // Existing GOOGLE user with complete profile
-            String token = jwtUtil.generateToken(email, "ROLE_USER");
+            // Existing GOOGLE user: Login directly
+            String token = jwtUtil.generateToken(email, "ROLE_USER", existingUser.getUserId());
             response.sendRedirect("http://localhost:5173/?token=" + token);
         } else {
-            // New User: Create basic entry and redirect to complete registration
-            Customer newUser = oauthUserService.saveCustomer(user);
-            response.sendRedirect(
-                    "http://localhost:5173/register" +
-                            "?email=" + URLEncoder.encode(email, StandardCharsets.UTF_8) +
-                            "&name=" + URLEncoder.encode(name, StandardCharsets.UTF_8) +
-                            "&userId=" + newUser.getUserId());
-
+            // New Google User: Create entry (now includes default profile/address) and
+            // login directly
+            com.example.model.Customer newUser = oauthUserService.saveCustomer(user);
+            String token = jwtUtil.generateToken(email, "ROLE_USER", newUser.getUserId());
+            response.sendRedirect("http://localhost:5173/?token=" + token);
         }
     }
 

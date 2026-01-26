@@ -24,7 +24,7 @@ public class JwtUtil {
 	}
 
 	public String extractRole(String token) {
-	    return getClaims(token).get("role", String.class);
+		return getClaims(token).get("role", String.class);
 	}
 
 	public Date extractExpiration(String token) {
@@ -48,14 +48,15 @@ public class JwtUtil {
 		return extractExpiration(token).before(new Date());
 	}
 
-	public String generateToken(String email, String role) {
-		
+	public String generateToken(String email, String role, Integer userId) {
+
 		if (!role.startsWith("ROLE_")) {
-	        role = "ROLE_" + role;
-	    }
-		
+			role = "ROLE_" + role;
+		}
+
 		return Jwts.builder().setSubject(email)
 				.claim("role", role)
+				.claim("userId", userId)
 				.setIssuer("EmartAuthService")
 				.setIssuedAt(new Date())
 				.setExpiration(new Date(System.currentTimeMillis() + 1 * 60 * 60 * 1000))

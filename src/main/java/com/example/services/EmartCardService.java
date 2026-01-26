@@ -1,5 +1,7 @@
 package com.example.services;
 
+import java.util.Optional;
+import com.example.dto.EmartCardDTO;
 import com.example.model.EmartCard;
 
 public interface EmartCardService {
@@ -8,5 +10,5 @@ public interface EmartCardService {
 
     void useEpoints(int userId, int pointsUsed);
 
-    EmartCard getCardDetails(int userId);
+    Optional<EmartCardDTO> getCardDetails(int userId);
 }

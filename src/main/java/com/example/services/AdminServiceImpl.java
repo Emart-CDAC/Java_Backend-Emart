@@ -36,6 +36,6 @@ public class AdminServiceImpl implements AdminService {
             throw new RuntimeException("Admin inactive");
         }
 
-        return jwtUtil.generateToken(email, "ROLE_ADMIN");
+        return jwtUtil.generateToken(email, "ROLE_ADMIN", admin.getAdminId());
     }
 }

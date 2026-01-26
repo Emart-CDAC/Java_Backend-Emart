@@ -20,6 +20,16 @@ public class AdminDashboardController {
     @Autowired
     private ProductCsvService csvService;
 
+    @Autowired
+    private com.example.services.OrdersService orderService;
+
+    @PutMapping("/orders/{orderId}/status")
+    public ResponseEntity<?> updateOrderStatus(
+            @PathVariable int orderId,
+            @RequestParam com.example.model.OrderStatus status) {
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
+    }
+
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getDashboardStats() {
         Map<String, Object> stats = dashboardService.getDashboardStats();

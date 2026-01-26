@@ -1,6 +1,7 @@
 package com.example.services;
 
 import java.util.Optional;
+import com.example.model.Address;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -31,7 +32,20 @@ public class OAuthUserService {
 		customer.setEmail(email);
 		customer.setFullName(oauthUser.getAttribute("name"));
 		customer.setAuthProvider(com.example.model.AuthProvider.GOOGLE);
-		customer.setProfileCompleted(false);
+		customer.setProfileCompleted(true); // Auto-complete
+		customer.setPassword("OAUTH_USER");
+
+		// Auto-create default Address to satisfy DB constraints
+		Address address = new Address();
+		address.setCity("Mumbai");
+		address.setState("Maharashtra");
+		address.setCountry("India");
+		address.setPincode("400001");
+		address.setTown("Mumbai");
+		address.setHouseNumber("N/A");
+		address.setLandmark("N/A");
+		address.setCustomer(customer);
+		customer.setAddress(address);
 
 		return customerRepository.save(customer);
 	}

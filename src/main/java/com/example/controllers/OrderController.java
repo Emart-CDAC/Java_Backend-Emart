@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.model.Customer;
@@ -19,16 +20,24 @@ import com.example.services.OrdersService;
 
 @RestController
 @RequestMapping("/api/order")
-public class OrderController 
-{
-	
+public class OrderController {
+
 	@Autowired
 	OrdersService orderService;
-	
+
 	@PostMapping("/placeOrder")
-	public ResponseEntity<String> placeOrder(Customer customer, BigDecimal totalAmount, int useEpoints) {
-	    orderService.placeOrder(customer, totalAmount, useEpoints);
-	    return ResponseEntity.ok("Order placed successfully");
+	public ResponseEntity<?> placeOrder(
+			@RequestParam int userId,
+			@RequestParam BigDecimal totalAmount,
+			@RequestParam int useEpoints,
+			@RequestParam(required = false) String deliveryType,
+			@RequestParam(required = false) String address) {
+		return ResponseEntity.ok(orderService.placeOrder(userId, totalAmount, useEpoints, deliveryType, address));
+	}
+
+	@GetMapping("/user/{userId}")
+	public ResponseEntity<List<Orders>> viewOrders(@PathVariable int userId) {
+		return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
 	}
 
 }
