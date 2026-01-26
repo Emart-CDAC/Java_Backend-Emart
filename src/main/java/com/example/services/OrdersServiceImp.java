@@ -6,10 +6,7 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.model.Customer;
-import com.example.model.Orders;
-import com.example.repository.CustomerRepository;
-import com.example.repository.OrdersRepository;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 
@@ -35,13 +32,8 @@ public class OrdersServiceImp implements OrdersService {
     private OrderItemRepository orderItemRepository;
 
     @Override
-    public List<Orders> getOrdersByUserId(int userId) {
-        return ordersRepository.findByCustomerUserId(userId);
-    }
-
-    @Override
-    public Orders placeOrder(int userId, BigDecimal totalAmount, int useEpoints, String deliveryType,
-            String addressStr) {
+    @Transactional
+    public Orders placeOrder(int userId, String deliveryType, String addressStr) {
 
         Customer customer = customerRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
@@ -51,62 +43,60 @@ public class OrdersServiceImp implements OrdersService {
 
         List<CartItems> cartItems = cartItemRepository.findByCart(cart);
         if (cartItems.isEmpty()) {
-            throw new RuntimeException("Cart is empty!");
+            throw new RuntimeException("Cart is empty");
         }
 
+        int usedEpoints = cart.getUsedEpoints();
+        int earnedEpoints = cart.getEarnedEpoints();
+
+        // ✅ Validate customer balance
+        if (usedEpoints > customer.getEpoints()) {
+            throw new RuntimeException("Insufficient e-points");
+        }
+
+        // ✅ Create Order
         Orders order = new Orders();
         order.setCustomer(customer);
         order.setOrderDate(LocalDateTime.now());
-        order.setTotalAmount(totalAmount);
+        order.setTotalAmount(BigDecimal.valueOf(cart.getFinalPayableAmount()));
+        order.setEpointsUsed(usedEpoints);
+        order.setEpointsEarned(earnedEpoints);
         order.setStatus(OrderStatus.pending);
         order.setPaymentStatus(PaymentStatus.PAID);
 
-        if ("pickup".equalsIgnoreCase(deliveryType)) {
-            order.setDeliveryType(DeliveryType.STORE);
-        } else {
-            order.setDeliveryType(DeliveryType.HOME_DELIVERY);
-        }
+        order.setDeliveryType(
+                "pickup".equalsIgnoreCase(deliveryType)
+                        ? DeliveryType.STORE
+                        : DeliveryType.HOME_DELIVERY);
 
         order.setAddress(customer.getAddress());
 
-        // ✅ Step 1: Check customer epoints
-        int availableEpoints = customer.getEpoints();
-
-        // ✅ Step 2: Validate points user wants to use
-        if (useEpoints > availableEpoints) {
-            throw new RuntimeException("Not enough epoints!");
-        }
-
-        // ✅ Step 3: Deduct epoints from customer
-        customer.setEpoints(availableEpoints - useEpoints);
-        order.setEpointsUsed(useEpoints);
-
-        // ✅ Step 4: Earn new epoints
-        int earnedPoints = totalAmount.intValue() / 100;
-        order.setEpointsEarned(earnedPoints);
-        customer.setEpoints(customer.getEpoints() + earnedPoints);
-
-        // ✅ Save order first to get ID
         Orders savedOrder = ordersRepository.save(order);
 
-        // ✅ Step 5: Convert CartItems to OrderItems
+        // ✅ Convert CartItems → OrderItems
         for (CartItems item : cartItems) {
             OrderItems orderItem = new OrderItems();
             orderItem.setOrder(savedOrder);
             orderItem.setProduct(item.getProduct());
             orderItem.setQuantity(item.getQuantity());
             orderItem.setPrice(item.getProduct().getNormalPrice());
-            orderItem.setSubtotal(item.getTotalPrice());
+            orderItem.setSubtotal(item.getSubtotal());
             orderItemRepository.save(orderItem);
         }
 
-        // ✅ Step 6: Clear Cart
-        cartItemRepository.deleteAll(cartItems);
-        cart.setTotalAmount(0.0);
-        cartRepository.save(cart);
-
-        // ✅ Save customer update
+        // ✅ Update customer e-points
+        customer.setEpoints(
+                customer.getEpoints() - usedEpoints + earnedEpoints);
         customerRepository.save(customer);
+
+        // ✅ Clear cart
+        cartItemRepository.deleteAll(cartItems);
+        cart.setTotalAmount(0);
+        cart.setTotalMrp(0);
+        cart.setEpointDiscount(0);
+        cart.setUsedEpoints(0);
+        cart.setEarnedEpoints(0);
+        cartRepository.save(cart);
 
         return savedOrder;
     }
@@ -118,4 +108,10 @@ public class OrdersServiceImp implements OrdersService {
         order.setStatus(status);
         return ordersRepository.save(order);
     }
+
+    @Override
+    public List<Orders> getOrdersByUserId(int userId) {
+        return ordersRepository.findByCustomerUserId(userId);
+    }
+
 }

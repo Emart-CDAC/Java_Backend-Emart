@@ -1,49 +1,68 @@
 package com.example.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import com.example.services.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-@RestController 
+import com.example.services.CartService;
+
+@RestController
 @RequestMapping("/api/cart")
-public class CartController 
-{
+public class CartController {
+
 	@Autowired
-	CartService cartservice;
-	
+	private CartService cartService;
+
+	// =============================
+	// ADD TO CART
+	// =============================
 	@PostMapping("/add")
-	public ResponseEntity<?>addToCart(@RequestParam int userId, @RequestParam int productId , @RequestParam(defaultValue = "1") int quantity)
-	{
-		return ResponseEntity.ok(cartservice.addToCart(userId,productId,quantity));
-		
-	}
-	
-	@DeleteMapping("/delete/{cartItemId}")
-	public ResponseEntity<?> removeFromCart(@PathVariable int cartItemId)
-	{
-		cartservice.removeFromCart(cartItemId);
-		return ResponseEntity.ok("Item removed.");
-		
-	}
-	
-	@PutMapping("/update")
-	public ResponseEntity<?> updateQuantity(@RequestParam int cartItemId,@RequestParam int quantity )
-	{
-		return ResponseEntity.ok(cartservice.updateQuantity(cartItemId , quantity));
-	}
-	
-	@GetMapping("/get/{userId}")
-	public ResponseEntity<?> viewCart(@PathVariable int userId)
-	{
-		return ResponseEntity.ok(cartservice.viewCart(userId));
+	public ResponseEntity<?> addToCart(
+			@RequestParam int userId,
+			@RequestParam int productId,
+			@RequestParam(defaultValue = "1") int quantity,
+			@RequestParam(defaultValue = "NORMAL") String purchaseType,
+			@RequestParam(defaultValue = "0") int epointsUsed) {
+
+		cartService.addToCart(userId, productId, quantity, purchaseType, epointsUsed);
+		return ResponseEntity.ok(cartService.getCartSummary(userId));
 	}
 
+	// =============================
+	// REMOVE ITEM
+	// =============================
+	@DeleteMapping("/delete/{cartItemId}")
+	public ResponseEntity<?> removeFromCart(@PathVariable int cartItemId) {
+		cartService.removeFromCart(cartItemId);
+		return ResponseEntity.ok("Item removed");
+	}
+
+	// =============================
+	// UPDATE QUANTITY
+	// =============================
+	@PutMapping("/update")
+	public ResponseEntity<?> updateQuantity(
+			@RequestParam int cartItemId,
+			@RequestParam int quantity) {
+
+		cartService.updateQuantity(cartItemId, quantity);
+		return ResponseEntity.ok("Quantity updated");
+	}
+
+	// =============================
+	// CART SUMMARY
+	// =============================
+	@GetMapping("/summary/{userId}")
+	public ResponseEntity<?> getCartSummary(@PathVariable int userId) {
+		return ResponseEntity.ok(cartService.getCartSummary(userId));
+	}
+
+	// =============================
+	// CLEAR CART
+	// =============================
+	@DeleteMapping("/clear/{userId}")
+	public ResponseEntity<?> clearCart(@PathVariable int userId) {
+		cartService.clearCartByUser(userId);
+		return ResponseEntity.ok("Cart cleared");
+	}
 }

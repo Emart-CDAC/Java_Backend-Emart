@@ -32,7 +32,7 @@ public class OrderController {
 			@RequestParam int useEpoints,
 			@RequestParam(required = false) String deliveryType,
 			@RequestParam(required = false) String address) {
-		return ResponseEntity.ok(orderService.placeOrder(userId, totalAmount, useEpoints, deliveryType, address));
+		return ResponseEntity.ok(orderService.placeOrder(userId, deliveryType, address));
 	}
 
 	@GetMapping("/user/{userId}")

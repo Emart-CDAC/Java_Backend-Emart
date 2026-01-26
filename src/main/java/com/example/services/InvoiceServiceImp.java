@@ -33,18 +33,21 @@ public class InvoiceServiceImp implements InvoiceService {
 		invoice.setCustomer(order.getCustomer());
 		invoice.setOrderDate(order.getOrderDate());
 
-		invoice.setDiscountAmount(order.getTotalAmount().doubleValue()); // temporary
-		invoice.setTaxAmount(0.0);
-
-		if (order.getTotalAmount() != null) {
-			invoice.setTotalAmount(order.getTotalAmount().doubleValue());
+		// Logic Update for Pricing
+		com.example.model.Cart cart = order.getCart();
+		if (cart != null) {
+			invoice.setDiscountAmount(cart.getEpointDiscount() + cart.getCouponDiscount());
+			invoice.setTotalAmount(cart.getFinalPayableAmount());
+			invoice.setEpointsUsed(cart.getUsedEpoints());
+			invoice.setEpointsEarned(cart.getEarnedEpoints());
 		} else {
-			invoice.setTotalAmount(order.getCart().getTotalAmount());
+			// Fallback if cart not present (should generally not happen if Order linked to
+			// Cart)
+			invoice.setDiscountAmount(0.0);
+			invoice.setTotalAmount(order.getTotalAmount() != null ? order.getTotalAmount().doubleValue() : 0.0);
+			invoice.setEpointsUsed(0);
+			invoice.setEpointsEarned(0);
 		}
-
-		invoice.setDeliveryType(order.getDeliveryType());
-		invoice.setEpointsUsed(order.getEpointsUsed());
-		invoice.setEpointsEarned(order.getEpointsEarned());
 		invoice.setEpointsBalance(0);
 
 		if (order.getAddress() != null) {
