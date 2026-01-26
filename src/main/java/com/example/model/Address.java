@@ -10,6 +10,7 @@ public class Address {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "Address_Id")
 	private int addressId;
+	
 	@ManyToOne
 	@JoinColumn(name = "User_id")
 	private Customer customer;
