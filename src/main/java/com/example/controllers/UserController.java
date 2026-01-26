@@ -34,7 +34,8 @@ public class UserController {
 
         String token = jwtUtil.generateToken(
                 customer.getEmail(),
-                "ROLE_USER");
+                "ROLE_USER",
+                customer.getUserId());
 
         return ResponseEntity.ok(new TokenResponse(token));
     }
@@ -66,7 +67,8 @@ public class UserController {
 
         String token = jwtUtil.generateToken(
                 updatedCustomer.getEmail(),
-                "ROLE_USER");
+                "ROLE_USER",
+                updatedCustomer.getUserId());
 
         return ResponseEntity.ok(new TokenResponse(token));
     }
