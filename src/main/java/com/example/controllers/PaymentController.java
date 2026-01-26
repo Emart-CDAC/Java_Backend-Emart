@@ -36,8 +36,23 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getPaymentMethod(orderId));
     }
 
-    @GetMapping("/order/{orderId}") //Get full payment details
-    public ResponseEntity<Payment> getPaymentByOrderId(@PathVariable int orderId) {
-        return ResponseEntity.ok(paymentService.getPaymentByOrderId(orderId));
+    
+    //----------------------------------razor pay methods------------------------
+    
+    @PostMapping("/create-razorpay-order/{orderId}")
+    public ResponseEntity<String> createRazorpayOrder(@PathVariable int orderId) throws Exception {
+        return ResponseEntity.ok(paymentService.createRazorpayOrder(orderId));
     }
+
+    @PostMapping("/verify-razorpay-payment/{orderId}")
+    public ResponseEntity<Payment> verifyPayment(@PathVariable int orderId,
+                                                 @RequestBody Payment payment) throws Exception {
+        return ResponseEntity.ok(paymentService.verifyRazorpayPayment(orderId, payment));
+    }
+    
+    @PostMapping("/cod/{orderId}")
+    public ResponseEntity<Payment> cashOnDelivery(@PathVariable int orderId) {
+        return ResponseEntity.ok(paymentService.createCashOnDeliveryPayment(orderId));
+    }
+    
 }
