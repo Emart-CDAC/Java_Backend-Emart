@@ -28,11 +28,11 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         // Example logic (you can store this in cart/order later)
         if (!deliveryType.equalsIgnoreCase("DELIVERY") &&
-            !deliveryType.equalsIgnoreCase("PICKUP")) {
+                !deliveryType.equalsIgnoreCase("PICKUP")) {
             throw new IllegalArgumentException("Invalid delivery type");
         }
 
-        // cart.setDeliveryType(deliveryType);  // if field exists
+        // cart.setDeliveryType(deliveryType); // if field exists
         cartRepository.save(cart);
 
         return "Delivery option '" + deliveryType + "' selected successfully";
@@ -47,7 +47,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         Cart cart = cartRepository.findByCustomer(customer)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
-        if (cart.getTotalAmount() == 0) {
+        if (cart.getTotalAmount().compareTo(java.math.BigDecimal.ZERO) == 0) {
             throw new RuntimeException("Cart is empty");
         }
 

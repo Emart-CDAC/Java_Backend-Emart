@@ -5,9 +5,8 @@ import com.example.dto.ProductResponseDTO;
 import com.example.model.Product;
 import com.example.model.SubCategory;
 
-public class ProductMapper 
-{
-	public static Product toEntity(ProductRequestDTO dto, SubCategory subCategory) {
+public class ProductMapper {
+    public static Product toEntity(ProductRequestDTO dto, SubCategory subCategory) {
 
         Product product = new Product();
         product.setName(dto.getName());
@@ -30,6 +29,7 @@ public class ProductMapper
         dto.setImageUrl(product.getImageUrl());
         dto.setNormalPrice(product.getNormalPrice());
         dto.setEcardPrice(product.getEcardPrice());
+        dto.setDiscountPercent(product.getDiscountPercent());
         dto.setAvailableQuantity(product.getAvailableQuantity());
         dto.setDescription(product.getDescription());
 

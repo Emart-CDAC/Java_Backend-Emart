@@ -82,12 +82,19 @@ public class ProductCSVHelper {
                 Product p = new Product();
                 p.setName(data[3].trim());
                 p.setImageUrl(data[4].trim());
-                p.setNormalPrice(Double.parseDouble(data[5]));
-                p.setEcardPrice(Double.parseDouble(data[6]));
-                p.setAvailableQuantity(Integer.parseInt(data[7]));
+                p.setNormalPrice(new java.math.BigDecimal(data[5].trim()));
+                p.setEcardPrice(new java.math.BigDecimal(data[6].trim()));
+                p.setAvailableQuantity(Integer.parseInt(data[7].trim()));
                 p.setDescription(data[8].trim());
-                p.setStoreId(Integer.parseInt(data[9]));
+                p.setStoreId(Integer.parseInt(data[9].trim()));
                 p.setSubCategory(subCategory);
+
+                // Discount Percent (Optional, index 10)
+                if (data.length > 10 && !data[10].trim().isEmpty()) {
+                    p.setDiscountPercent(new java.math.BigDecimal(data[10].trim()));
+                } else {
+                    p.setDiscountPercent(java.math.BigDecimal.ZERO);
+                }
 
                 products.add(p);
             }

@@ -18,22 +18,22 @@ public class Cart {
 	private Customer customer;
 
 	@Column(name = "Total_Amount")
-	private double totalAmount;
+	private BigDecimal totalAmount;
 
 	@Column(name = "Total_MRP")
-	private double totalMrp;
+	private BigDecimal totalMrp;
 
 	@Column(name = "Epoint_Discount")
-	private double epointDiscount;
+	private BigDecimal epointDiscount;
 
 	@Column(name = "Coupon_Discount")
-	private Double couponDiscount;
+	private BigDecimal couponDiscount;
 
 	@Column(name = "Platform_Fee")
-	private double platformFee;
+	private BigDecimal platformFee;
 
 	@Column(name = "Final_Payable_Amount")
-	private double finalPayableAmount;
+	private BigDecimal finalPayableAmount;
 
 	@Column(name = "Used_Epoints")
 	private int usedEpoints;
@@ -57,51 +57,51 @@ public class Cart {
 		this.customer = customer;
 	}
 
-	public double getTotalAmount() {
+	public BigDecimal getTotalAmount() {
 		return totalAmount;
 	}
 
-	public void setTotalAmount(double totalAmount) {
+	public void setTotalAmount(BigDecimal totalAmount) {
 		this.totalAmount = totalAmount;
 	}
 
-	public double getTotalMrp() {
+	public BigDecimal getTotalMrp() {
 		return totalMrp;
 	}
 
-	public void setTotalMrp(double totalMrp) {
+	public void setTotalMrp(BigDecimal totalMrp) {
 		this.totalMrp = totalMrp;
 	}
 
-	public double getEpointDiscount() {
+	public BigDecimal getEpointDiscount() {
 		return epointDiscount;
 	}
 
-	public void setEpointDiscount(double epointDiscount) {
+	public void setEpointDiscount(BigDecimal epointDiscount) {
 		this.epointDiscount = epointDiscount;
 	}
 
-	public Double getCouponDiscount() {
+	public BigDecimal getCouponDiscount() {
 		return couponDiscount;
 	}
 
-	public void setCouponDiscount(Double couponDiscount) {
+	public void setCouponDiscount(BigDecimal couponDiscount) {
 		this.couponDiscount = couponDiscount;
 	}
 
-	public double getPlatformFee() {
+	public BigDecimal getPlatformFee() {
 		return platformFee;
 	}
 
-	public void setPlatformFee(double platformFee) {
+	public void setPlatformFee(BigDecimal platformFee) {
 		this.platformFee = platformFee;
 	}
 
-	public double getFinalPayableAmount() {
+	public BigDecimal getFinalPayableAmount() {
 		return finalPayableAmount;
 	}
 
-	public void setFinalPayableAmount(double finalPayableAmount) {
+	public void setFinalPayableAmount(BigDecimal finalPayableAmount) {
 		this.finalPayableAmount = finalPayableAmount;
 	}
 

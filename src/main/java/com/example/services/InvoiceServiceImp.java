@@ -36,15 +36,22 @@ public class InvoiceServiceImp implements InvoiceService {
 		// Logic Update for Pricing
 		com.example.model.Cart cart = order.getCart();
 		if (cart != null) {
-			invoice.setDiscountAmount(cart.getEpointDiscount() + cart.getCouponDiscount());
+			java.math.BigDecimal eDiscount = cart.getEpointDiscount();
+			java.math.BigDecimal cDiscount = cart.getCouponDiscount();
+			if (eDiscount == null)
+				eDiscount = java.math.BigDecimal.ZERO;
+			if (cDiscount == null)
+				cDiscount = java.math.BigDecimal.ZERO;
+
+			invoice.setDiscountAmount(eDiscount.add(cDiscount));
 			invoice.setTotalAmount(cart.getFinalPayableAmount());
 			invoice.setEpointsUsed(cart.getUsedEpoints());
 			invoice.setEpointsEarned(cart.getEarnedEpoints());
 		} else {
 			// Fallback if cart not present (should generally not happen if Order linked to
 			// Cart)
-			invoice.setDiscountAmount(0.0);
-			invoice.setTotalAmount(order.getTotalAmount() != null ? order.getTotalAmount().doubleValue() : 0.0);
+			invoice.setDiscountAmount(java.math.BigDecimal.ZERO);
+			invoice.setTotalAmount(order.getTotalAmount() != null ? order.getTotalAmount() : java.math.BigDecimal.ZERO);
 			invoice.setEpointsUsed(0);
 			invoice.setEpointsEarned(0);
 		}

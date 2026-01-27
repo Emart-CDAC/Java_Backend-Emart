@@ -77,7 +77,7 @@ public class OrdersServiceImp implements OrdersService {
         order.setOrderDate(LocalDateTime.now());
         order.setDeliveryType(req.getDeliveryType());
         order.setPaymentMethod(req.getPaymentMethod());
-        order.setTotalAmount(BigDecimal.valueOf(cart.getFinalPayableAmount()));
+        order.setTotalAmount(cart.getFinalPayableAmount());
         order.setEpointsUsed(cart.getUsedEpoints());
         order.setEpointsEarned(cart.getEarnedEpoints());
         order.setStatus(OrderStatus.CONFIRMED); // Case-insensitive handled by Converter now
@@ -121,10 +121,10 @@ public class OrdersServiceImp implements OrdersService {
 
         // CLEAR CART
         cartItemRepository.deleteByCart_CartId(cart.getCartId());
-        cart.setTotalMrp(0);
-        cart.setFinalPayableAmount(0);
+        cart.setTotalMrp(BigDecimal.ZERO);
+        cart.setFinalPayableAmount(BigDecimal.ZERO);
         cart.setUsedEpoints(0);
-        cart.setEpointDiscount(0);
+        cart.setEpointDiscount(BigDecimal.ZERO);
         cart.setEarnedEpoints(0);
         cartRepository.save(cart);
 

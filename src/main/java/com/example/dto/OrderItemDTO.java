@@ -5,11 +5,11 @@ import java.math.BigDecimal;
 public class OrderItemDTO {
     private String productName;
     private int quantity;
-    private double price;
-    private double subtotal;
+    private java.math.BigDecimal price;
+    private java.math.BigDecimal subtotal;
     private String imageUrl; // Optional, if you want to show image
 
-    public OrderItemDTO(String productName, int quantity, double price, double subtotal) {
+    public OrderItemDTO(String productName, int quantity, java.math.BigDecimal price, java.math.BigDecimal subtotal) {
         this.productName = productName;
         this.quantity = quantity;
         this.price = price;
@@ -32,19 +32,19 @@ public class OrderItemDTO {
         this.quantity = quantity;
     }
 
-    public double getPrice() {
+    public java.math.BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(java.math.BigDecimal price) {
         this.price = price;
     }
 
-    public double getSubtotal() {
+    public java.math.BigDecimal getSubtotal() {
         return subtotal;
     }
 
-    public void setSubtotal(double subtotal) {
+    public void setSubtotal(java.math.BigDecimal subtotal) {
         this.subtotal = subtotal;
     }
 }

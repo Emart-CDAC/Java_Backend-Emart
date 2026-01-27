@@ -14,128 +14,153 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
-
 @Entity
 @Table(name = "invoice")
 public class Invoice {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int invoiceId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int invoiceId;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Orders order;
+	@ManyToOne
+	@JoinColumn(name = "order_id")
+	private Orders order;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private Customer customer;
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private Customer customer;
 
-    @Column(name = "order_date")
-    private LocalDateTime orderDate;
+	@Column(name = "order_date")
+	private LocalDateTime orderDate;
 
-    @OneToOne
-    @JoinColumn(name = "order_id", referencedColumnName = "order_id", insertable = false, updatable = false)
-    private Payment payment;
+	@OneToOne
+	@JoinColumn(name = "order_id", referencedColumnName = "order_id", insertable = false, updatable = false)
+	private Payment payment;
 
-    private double  discountAmount;
-    private double taxAmount;
-    private double totalAmount;
+	private java.math.BigDecimal discountAmount;
+	private java.math.BigDecimal taxAmount;
+	private java.math.BigDecimal totalAmount;
 
-    @Enumerated(EnumType.STRING)
-    private DeliveryType deliveryType;
+	@Enumerated(EnumType.STRING)
+	private DeliveryType deliveryType;
 
-    private String billingAddress;
-    private String shippingAddress;
+	private String billingAddress;
+	private String shippingAddress;
 
-    private int epointsUsed;
-    private int epointsBalance;
-    private int epointsEarned;
+	private int epointsUsed;
+	private int epointsBalance;
+	private int epointsEarned;
+
 	public int getInvoiceId() {
 		return invoiceId;
 	}
+
 	public void setInvoiceId(int invoiceId) {
 		this.invoiceId = invoiceId;
 	}
+
 	public Orders getOrder() {
 		return order;
 	}
+
 	public void setOrder(Orders order) {
 		this.order = order;
 	}
+
 	public Customer getCustomer() {
 		return customer;
 	}
+
 	public void setCustomer(Customer customer) {
 		this.customer = customer;
 	}
+
 	public LocalDateTime getOrderDate() {
 		return orderDate;
 	}
+
 	public void setOrderDate(LocalDateTime orderDate) {
 		this.orderDate = orderDate;
 	}
+
 	public Payment getPayment() {
-        return payment;
-    }
-	public void setPayment(Payment payment)
-	{
-		this.payment=payment;
+		return payment;
 	}
-	public double getDiscountAmount() {
+
+	public void setPayment(Payment payment) {
+		this.payment = payment;
+	}
+
+	public java.math.BigDecimal getDiscountAmount() {
 		return discountAmount;
 	}
-	public void setDiscountAmount(double discountAmount) {
+
+	public void setDiscountAmount(java.math.BigDecimal discountAmount) {
 		this.discountAmount = discountAmount;
 	}
-	public double getTaxAmount() {
+
+	public java.math.BigDecimal getTaxAmount() {
 		return taxAmount;
 	}
-	public void setTaxAmount(double taxAmount) {
+
+	public void setTaxAmount(java.math.BigDecimal taxAmount) {
 		this.taxAmount = taxAmount;
 	}
-	public double getTotalAmount() {
+
+	public java.math.BigDecimal getTotalAmount() {
 		return totalAmount;
 	}
-	public void setTotalAmount(double totalAmount) {
+
+	public void setTotalAmount(java.math.BigDecimal totalAmount) {
 		this.totalAmount = totalAmount;
 	}
+
 	public DeliveryType getDeliveryType() {
 		return deliveryType;
 	}
+
 	public void setDeliveryType(DeliveryType deliveryType) {
 		this.deliveryType = deliveryType;
 	}
+
 	public String getBillingAddress() {
 		return billingAddress;
 	}
+
 	public void setBillingAddress(String billingAddress) {
 		this.billingAddress = billingAddress;
 	}
+
 	public String getShippingAddress() {
 		return shippingAddress;
 	}
+
 	public void setShippingAddress(String shippingAddress) {
 		this.shippingAddress = shippingAddress;
 	}
+
 	public int getEpointsUsed() {
 		return epointsUsed;
 	}
+
 	public void setEpointsUsed(int epointsUsed) {
 		this.epointsUsed = epointsUsed;
 	}
+
 	public int getEpointsBalance() {
 		return epointsBalance;
 	}
+
 	public void setEpointsBalance(int epointsBalance) {
 		this.epointsBalance = epointsBalance;
 	}
+
 	public int getEpointsEarned() {
 		return epointsEarned;
 	}
+
 	public void setEpointsEarned(int epointsEarned) {
 		this.epointsEarned = epointsEarned;
 	}
 
-    
 }

@@ -18,10 +18,13 @@ public class Product {
 	private String imageUrl;
 
 	@Column(name = "normal_price", nullable = false)
-	private double normalPrice;
+	private java.math.BigDecimal normalPrice;
 
 	@Column(name = "ecard_price")
-	private Double ecardPrice;
+	private java.math.BigDecimal ecardPrice;
+
+	@Column(name = "discount_percent", precision = 5, scale = 2)
+	private java.math.BigDecimal discountPercent = java.math.BigDecimal.ZERO;
 
 	@Column(name = "available_quantity")
 	private int availableQuantity;
@@ -62,20 +65,28 @@ public class Product {
 		this.imageUrl = imageUrl;
 	}
 
-	public double getNormalPrice() {
+	public java.math.BigDecimal getNormalPrice() {
 		return normalPrice;
 	}
 
-	public void setNormalPrice(double normalPrice) {
+	public void setNormalPrice(java.math.BigDecimal normalPrice) {
 		this.normalPrice = normalPrice;
 	}
 
-	public Double getEcardPrice() {
+	public java.math.BigDecimal getEcardPrice() {
 		return ecardPrice;
 	}
 
-	public void setEcardPrice(Double ecardPrice) {
+	public void setEcardPrice(java.math.BigDecimal ecardPrice) {
 		this.ecardPrice = ecardPrice;
+	}
+
+	public java.math.BigDecimal getDiscountPercent() {
+		return discountPercent;
+	}
+
+	public void setDiscountPercent(java.math.BigDecimal discountPercent) {
+		this.discountPercent = discountPercent;
 	}
 
 	public int getAvailableQuantity() {
@@ -111,5 +122,14 @@ public class Product {
 	}
 
 	public Product() {
+	}
+
+	// Helper method to calculate discounted price
+	public java.math.BigDecimal getEffectivePrice() {
+		if (discountPercent != null && discountPercent.compareTo(java.math.BigDecimal.ZERO) > 0) {
+			return normalPrice.subtract(
+					normalPrice.multiply(discountPercent).divide(java.math.BigDecimal.valueOf(100)));
+		}
+		return normalPrice;
 	}
 }
