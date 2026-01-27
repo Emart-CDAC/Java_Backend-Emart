@@ -20,15 +20,27 @@ public class CategoryController {
     @Autowired
     private SubCategoryService subCategoryService;
 
-    //  List Categories
+    // List Categories (only Parents)
     @GetMapping
     public List<Category> listCategories() {
-        return categoryRepository.findAll();
+        // Simple filtering stream from findAll, or better: add a custom query method in
+        // repo
+        return categoryRepository.findAll().stream()
+                .filter(c -> c.getParentCategory() == null)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     // View sub-categories by category id
     @GetMapping("/{categoryId}/subcategories")
     public List<SubCategory> getSubCategories(@PathVariable int categoryId) {
         return subCategoryService.getSubCategoriesByCategory(categoryId);
+    }
+
+    // View Child Categories by Parent ID
+    @GetMapping("/{parentId}/children")
+    public List<Category> getChildCategories(@PathVariable int parentId) {
+        Category parent = categoryRepository.findById(parentId)
+                .orElseThrow(() -> new RuntimeException("Parent Category not found"));
+        return categoryRepository.findByParentCategory(parent);
     }
 }
