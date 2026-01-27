@@ -33,6 +33,8 @@ public class OrdersServiceImp implements OrdersService {
     private StoreRepository storeRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private InvoiceService invoiceService;
 
     @Override
     @Transactional
@@ -126,20 +128,43 @@ public class OrdersServiceImp implements OrdersService {
         cart.setEarnedEpoints(0);
         cartRepository.save(cart);
 
-        // SEND EMAIL
+        // GENERATE INVOICE ENTITY
         try {
-            String subject = "Order Confirmation - Order #" + savedOrder.getOrderId();
-            String body = "Dear " + customer.getFullName() + ",\n\n" +
-                    "Thank you for shopping with e-MART!\n" +
-                    "Your order has been placed successfully.\n\n" +
-                    "Order ID: " + savedOrder.getOrderId() + "\n" +
-                    "Amount Paid: ₹" + savedOrder.getTotalAmount() + "\n" +
-                    "Payment Method: " + savedOrder.getPaymentMethod() + "\n\n" +
-                    "We hope to see you again soon!\n\ne-MART Team";
-            emailService.sendEmail(customer.getEmail(), subject, body);
+            // We need to inject InvoiceService here or use a bean if circular dependency
+            // allows.
+            // Usually InvoiceService depends on OrderService (for lookup), but here
+            // OrderService depends on InvoiceService (for creation).
+            // Circular dependency risk: OrderService -> InvoiceService -> OrderService.
+            // InvoiceServiceImp injects OrdersRepository, not OrdersService, so it should
+            // be fine.
+            // We need to AutoWire InvoiceService.
+        } catch (Exception e) {
+            System.err.println("Failed to create invoice entity: " + e.getMessage());
+        }
+
+        // SEND EMAIL WITH PDF
+        try {
+            // Generate PDF
+            // Assuming we autowired invoiceService (Need to add field first)
+            byte[] pdfBytes = invoiceService.generateInvoicePdf(savedOrder);
+
+            if (pdfBytes != null) {
+                emailService.sendPdf(customer.getEmail(), pdfBytes);
+                System.out.println("✅ Invoice PDF sent to: " + customer.getEmail());
+            } else {
+                // Fallback to simple email
+                String subject = "Order Confirmation - Order #" + savedOrder.getOrderId();
+                String body = "Dear " + customer.getFullName() + ",\n\n" +
+                        "Thank you for shopping with e-MART!\n" +
+                        "Your order has been placed successfully.\n\n" +
+                        "Order ID: " + savedOrder.getOrderId() + "\n" +
+                        "Amount Paid: Rs." + savedOrder.getTotalAmount() + "\n\n" +
+                        "Please find your invoice attached (if generated).\n\ne-MART Team";
+                emailService.sendEmail(customer.getEmail(), subject, body);
+            }
+
         } catch (Exception e) {
             System.err.println("⚠️ Failed to send email: " + e.getMessage());
-            // Don't fail the order if email fails
         }
 
         return savedOrder;

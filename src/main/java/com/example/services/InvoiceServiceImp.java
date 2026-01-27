@@ -70,4 +70,72 @@ public class InvoiceServiceImp implements InvoiceService {
 	public List<Invoice> findAll() {
 		return invoiceRepo.findAll();
 	}
+
+	@Override
+	public byte[] generateInvoicePdf(Orders order) {
+		try (java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream()) {
+			com.lowagie.text.Document document = new com.lowagie.text.Document();
+			com.lowagie.text.pdf.PdfWriter.getInstance(document, baos);
+
+			document.open();
+
+			com.lowagie.text.Font fontTitle = com.lowagie.text.FontFactory
+					.getFont(com.lowagie.text.FontFactory.HELVETICA_BOLD);
+			fontTitle.setSize(18);
+
+			com.lowagie.text.Paragraph title = new com.lowagie.text.Paragraph("INVOICE", fontTitle);
+			title.setAlignment(com.lowagie.text.Paragraph.ALIGN_CENTER);
+			document.add(title);
+			document.add(new com.lowagie.text.Paragraph(" ")); // Spacer
+
+			com.lowagie.text.Font fontHeader = com.lowagie.text.FontFactory
+					.getFont(com.lowagie.text.FontFactory.HELVETICA_BOLD);
+			document.add(new com.lowagie.text.Paragraph("Order ID: " + order.getOrderId(), fontHeader));
+			document.add(new com.lowagie.text.Paragraph("Date: " + order.getOrderDate()));
+			document.add(new com.lowagie.text.Paragraph("Customer: " + order.getCustomer().getFullName()));
+			document.add(new com.lowagie.text.Paragraph("Email: " + order.getCustomer().getEmail()));
+			document.add(new com.lowagie.text.Paragraph("Payment Method: " + order.getPaymentMethod()));
+
+			if (order.getAddress() != null) {
+				document.add(new com.lowagie.text.Paragraph("Shipping Address: " + order.getAddress().toString()));
+			}
+
+			document.add(new com.lowagie.text.Paragraph(" "));
+
+			// Table
+			com.lowagie.text.pdf.PdfPTable table = new com.lowagie.text.pdf.PdfPTable(4);
+			table.setWidthPercentage(100);
+			table.setSpacingBefore(10f);
+			table.setSpacingAfter(10f);
+
+			// Headers
+			table.addCell("Product");
+			table.addCell("Quantity");
+			table.addCell("Unit Price");
+			table.addCell("Total");
+
+			// Items
+			for (com.example.model.OrderItems item : order.getOrderItems()) {
+				table.addCell(item.getProduct().getName());
+				table.addCell(String.valueOf(item.getQuantity()));
+				table.addCell("Rs." + item.getPrice());
+				table.addCell("Rs." + item.getSubtotal());
+			}
+
+			document.add(table);
+
+			document.add(new com.lowagie.text.Paragraph("Total Amount: Rs." + order.getTotalAmount(), fontHeader));
+
+			document.add(new com.lowagie.text.Paragraph(" "));
+			document.add(new com.lowagie.text.Paragraph("Thank you for shopping with e-MART!"));
+
+			document.close();
+
+			return baos.toByteArray();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 }
