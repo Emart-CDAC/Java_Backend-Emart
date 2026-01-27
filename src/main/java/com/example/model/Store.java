@@ -9,7 +9,7 @@ public class Store {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "Store_id")
-	private Long storeId;
+	private int storeId;
 
 	@Column(name = "Store_Name", nullable = false)
 	private String storeName;
@@ -26,11 +26,11 @@ public class Store {
 	@Column(name = "Availability")
 	private boolean availability;
 
-	public Long getStoreId() {
+	public int getStoreId() {
 		return storeId;
 	}
 
-	public void setStoreId(Long storeId) {
+	public void setStoreId(int storeId) {
 		this.storeId = storeId;
 	}
 

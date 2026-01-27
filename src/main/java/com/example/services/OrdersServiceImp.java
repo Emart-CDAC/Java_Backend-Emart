@@ -154,8 +154,16 @@ public class OrdersServiceImp implements OrdersService {
     }
 
     @Override
+    @Transactional
     public List<Orders> getOrdersByUserId(int userId) {
-        return ordersRepository.findByCustomerUserId(userId);
+        List<Orders> orders = ordersRepository.findByCustomerUserId(userId);
+        // Initialize lazy collection for each order
+        for (Orders order : orders) {
+            if (order.getOrderItems() != null) {
+                order.getOrderItems().size();
+            }
+        }
+        return orders;
     }
 
     @Override

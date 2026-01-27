@@ -32,7 +32,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public Address updateAddress(Long addressId, Address address) {
+    public Address updateAddress(int addressId, Address address) {
         Address existing = addressRepository.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("Address not found"));
 
@@ -46,7 +46,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public void deleteAddress(Long addressId) {
+    public void deleteAddress(int addressId) {
         addressRepository.deleteById(addressId);
     }
 

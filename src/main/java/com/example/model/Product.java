@@ -11,10 +11,10 @@ public class Product {
 	@Column(name = "product_id")
 	private int id;
 
-	@Column(name = "product_name", nullable = false, length = 100)
+	@Column(name = "product_name", nullable = false, length = 500)
 	private String name;
 
-	@Column(name = "product_image_url", length = 255)
+	@Column(name = "product_image_url", length = 1000)
 	private String imageUrl;
 
 	@Column(name = "normal_price", nullable = false)
@@ -26,7 +26,7 @@ public class Product {
 	@Column(name = "available_quantity")
 	private int availableQuantity;
 
-	@Column(name = "description")
+	@Column(name = "description", length = 5000)
 	private String description;
 
 	// FK → SubCategory

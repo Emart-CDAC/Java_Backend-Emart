@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.model.Address;
 import com.example.model.Customer;
 
-public interface AddressRepository extends JpaRepository<Address, Long> {
+public interface AddressRepository extends JpaRepository<Address, Integer> {
 
     // Get all addresses of a customer
     List<Address> findByCustomer(Customer customer);

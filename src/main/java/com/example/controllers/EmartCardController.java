@@ -26,8 +26,8 @@ public class EmartCardController {
     }
 
     @PostMapping("/apply")
-    public EmartCard applyForCard(@RequestBody EmartCard card) {
-        return emartCardService.applyForCard(card);
+    public EmartCard applyForCard(@RequestBody com.example.dto.ApplyEmartCardRequest request) {
+        return emartCardService.applyForCard(request);
     }
 
     @PostMapping("/use-epoints")

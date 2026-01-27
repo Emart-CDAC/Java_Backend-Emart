@@ -8,9 +8,9 @@ public interface AddressService {
 
     Address addAddress(int userId, Address address);
 
-    Address updateAddress(Long addressId, Address address);
+    Address updateAddress(int addressId, Address address);
 
-    void deleteAddress(Long addressId);
+    void deleteAddress(int addressId);
 
     Address getUserAddress(Integer userId);
 

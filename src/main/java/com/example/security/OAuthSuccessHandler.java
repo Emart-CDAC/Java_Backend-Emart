@@ -48,13 +48,13 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
             // Existing GOOGLE user: Login directly
             String token = jwtUtil.generateToken(email, "ROLE_USER", existingUser.getUserId());
-            response.sendRedirect("http://localhost:5173/?token=" + token);
+            response.sendRedirect("http://localhost:5173/login?token=" + token);
         } else {
             // New Google User: Create entry (now includes default profile/address) and
             // login directly
             com.example.model.Customer newUser = oauthUserService.saveCustomer(user);
             String token = jwtUtil.generateToken(email, "ROLE_USER", newUser.getUserId());
-            response.sendRedirect("http://localhost:5173/?token=" + token);
+            response.sendRedirect("http://localhost:5173/login?token=" + token);
         }
     }
 

@@ -38,4 +38,10 @@ public class AdminServiceImpl implements AdminService {
 
         return jwtUtil.generateToken(email, "ROLE_ADMIN", admin.getAdminId());
     }
+
+    @Override
+    public Admin getAdminById(int id) {
+        return adminRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Admin not found"));
+    }
 }

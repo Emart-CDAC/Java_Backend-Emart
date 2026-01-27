@@ -9,8 +9,8 @@ public class PlaceOrderRequest {
     private DeliveryType deliveryType;
     private PaymentMethod paymentMethod;
 
-    private Long addressId; // for HOME_DELIVERY
-    private Long storeId; // for STORE_PICKUP
+    private Integer addressId; // for HOME_DELIVERY
+    private Integer storeId; // for STORE_PICKUP
 
     // getters & setters
     public int getUserId() {
@@ -37,19 +37,19 @@ public class PlaceOrderRequest {
         this.paymentMethod = paymentMethod;
     }
 
-    public Long getAddressId() {
+    public Integer getAddressId() {
         return addressId;
     }
 
-    public void setAddressId(Long addressId) {
+    public void setAddressId(Integer addressId) {
         this.addressId = addressId;
     }
 
-    public Long getStoreId() {
+    public Integer getStoreId() {
         return storeId;
     }
 
-    public void setStoreId(Long storeId) {
+    public void setStoreId(Integer storeId) {
         this.storeId = storeId;
     }
 }

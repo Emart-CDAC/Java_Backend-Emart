@@ -9,7 +9,7 @@ public class Address {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "Address_Id")
-	private Long addressId;
+	private int addressId;
 
 	@ManyToOne
 	@JoinColumn(name = "User_id")
@@ -37,11 +37,11 @@ public class Address {
 	@Column(name = "HouseNumber")
 	private String houseNumber;
 
-	public Long getAddressId() {
+	public int getAddressId() {
 		return addressId;
 	}
 
-	public void setAddressId(Long addressId) {
+	public void setAddressId(int addressId) {
 		this.addressId = addressId;
 	}
 

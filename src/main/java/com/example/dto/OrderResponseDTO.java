@@ -21,14 +21,14 @@ public class OrderResponseDTO {
 	private String customerEmail;
 
 	// Address info (flattened)
-	private Long addressId;
+	private Integer addressId;
 	private String addressLine;
 	private String city;
 	private String state;
 	private String pincode;
 
 	// Store info (if store pickup)
-	private Long storeId;
+	private Integer storeId;
 	private String storeName;
 	private String storeCity;
 
@@ -139,11 +139,11 @@ public class OrderResponseDTO {
 		this.customerEmail = customerEmail;
 	}
 
-	public Long getAddressId() {
+	public Integer getAddressId() {
 		return addressId;
 	}
 
-	public void setAddressId(Long addressId) {
+	public void setAddressId(Integer addressId) {
 		this.addressId = addressId;
 	}
 
@@ -179,11 +179,11 @@ public class OrderResponseDTO {
 		this.pincode = pincode;
 	}
 
-	public Long getStoreId() {
+	public Integer getStoreId() {
 		return storeId;
 	}
 
-	public void setStoreId(Long storeId) {
+	public void setStoreId(Integer storeId) {
 		this.storeId = storeId;
 	}
 

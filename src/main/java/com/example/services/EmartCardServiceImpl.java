@@ -23,28 +23,50 @@ public class EmartCardServiceImpl implements EmartCardService {
 
     // Apply for eMart Card
     @Override
-    public EmartCard applyForCard(EmartCard card) {
+    @org.springframework.transaction.annotation.Transactional
+    public EmartCard applyForCard(com.example.dto.ApplyEmartCardRequest request) {
 
-        if (emartCardRepository.existsByUserId(card.getUserId())) {
+        if (emartCardRepository.existsByUserId(request.getUserId())) {
             throw new RuntimeException("User already has an eMart Card");
         }
 
-        // Verify eligibility (100 e-points)
-        Customer customer = customerRepository.findByUserId(card.getUserId())
+        // Fetch User
+        Customer customer = customerRepository.findByUserId(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (customer.getEpoints() < 100) {
-            throw new RuntimeException(
-                    "Eligibility check failed: You need at least 100 e-points to apply for an e-MART card. Currently you have "
-                            + customer.getEpoints() + " points.");
+        // Create new Card
+        EmartCard card = new EmartCard();
+        card.setUserId(request.getUserId());
+        card.setAnnualIncome(request.getAnnualIncome());
+        card.setPanCard(request.getPanCard());
+        card.setBankDetails(request.getBankDetails());
+        card.setOccupation(request.getOccupation());
+        card.setEducationQualification(request.getEducationQualification());
+
+        // Set Card Defaults
+        card.setPurchaseDate(LocalDate.now());
+        card.setExpiryDate(LocalDate.now().plusYears(5)); // Changed to 5 years per requirement
+        card.setTotalEpointsUsed(0);
+        card.setStatus("ACTIVE");
+
+        // Save Card
+        card = emartCardRepository.save(card);
+
+        // Update Customer Profile & Points
+        customer.setEmartCard(card); // Link card
+        customer.setEpoints(customer.getEpoints() + 100); // Bonus Points
+
+        // Update optional fields if provided
+        if (request.getBirthDate() != null) {
+            customer.setBirthDate(request.getBirthDate());
+        }
+        if (request.getInterests() != null) {
+            customer.setInterests(request.getInterests());
         }
 
-        card.setPurchaseDate(LocalDate.now());
-        card.setExpiryDate(LocalDate.now().plusYears(1));
-        card.setTotalEpointsUsed(0);
-        card.setStatus("ACTIVE"); // Automatically granted
+        customerRepository.save(customer);
 
-        return emartCardRepository.save(card);
+        return card;
     }
 
     // Use e-points
