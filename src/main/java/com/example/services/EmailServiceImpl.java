@@ -17,15 +17,15 @@ public class EmailServiceImpl implements EmailService {
     private JavaMailSender mailSender;
 
     @Override
-    public void sendPdf(String toEmail, byte[] pdfBytes) {
+    public void sendPdf(String toEmail, String subject, String body, byte[] pdfBytes) {
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
             helper.setTo(toEmail);
-            helper.setSubject("Invoice");
-            helper.setText("Please find your invoice attached.");
+            helper.setSubject(subject);
+            helper.setText(body);
 
             ByteArrayDataSource dataSource = new ByteArrayDataSource(pdfBytes, "application/pdf");
 

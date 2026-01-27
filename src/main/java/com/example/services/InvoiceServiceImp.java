@@ -103,9 +103,10 @@ public class InvoiceServiceImp implements InvoiceService {
 			document.add(new com.lowagie.text.Paragraph("Email: " + order.getCustomer().getEmail()));
 			document.add(new com.lowagie.text.Paragraph("Payment Method: " + order.getPaymentMethod()));
 
-			if (order.getAddress() != null) {
-				document.add(new com.lowagie.text.Paragraph("Shipping Address: " + order.getAddress().toString()));
-			}
+			// if (order.getAddress() != null) {
+			// document.add(new com.lowagie.text.Paragraph("Shipping Address: " +
+			// order.getAddress().toString()));
+			// }
 
 			document.add(new com.lowagie.text.Paragraph(" "));
 
