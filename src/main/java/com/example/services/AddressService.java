@@ -12,7 +12,7 @@ public interface AddressService {
 
     void deleteAddress(Long addressId);
 
-    Address getUserAddress(Long userId);
+    Address getUserAddress(Integer userId);
 
-	List<Address> getAddressesByCustomer(Long customerId);
+    List<Address> getAddressesByCustomer(Integer customerId);
 }

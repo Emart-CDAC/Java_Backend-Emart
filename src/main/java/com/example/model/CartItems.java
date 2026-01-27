@@ -7,27 +7,33 @@ import java.math.BigDecimal;
 @Table(name = "Cart_Items")
 public class CartItems {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Cart_item_id")
-    private int cartItemId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "Cart_item_id")
+	private int cartItemId;
 
-    @ManyToOne
-    @JoinColumn(name = "Cart_Id")
-    private Cart cart;
+	@ManyToOne
+	@JoinColumn(name = "Cart_Id")
+	private Cart cart;
 
-    @ManyToOne
-    @JoinColumn(name = "Product_Id")
-    private Product product;
+	@ManyToOne
+	@JoinColumn(name = "Product_Id")
+	private Product product;
 
-    @Column(name = "Quantity")
-    private int quantity;
+	@Column(name = "Quantity")
+	private int quantity;
 
-    @Column(name = "Subtotal")
-    private double subtotal;
+	@Column(name = "Subtotal")
+	private double subtotal;
 
-    @Column(name = "Total_Price")
-    private double totalPrice;
+	@Column(name = "Total_Price")
+	private double totalPrice;
+
+	@Column(name = "Purchase_Type")
+	private String purchaseType; // "NORMAL", "PARTIAL_EP", "FULL_EP"
+
+	@Column(name = "Epoints_Used")
+	private Integer epointsUsed;
 
 	public int getCartItemId() {
 		return cartItemId;
@@ -77,5 +83,20 @@ public class CartItems {
 		this.totalPrice = totalPrice;
 	}
 
-    
+	public String getPurchaseType() {
+		return purchaseType;
+	}
+
+	public void setPurchaseType(String purchaseType) {
+		this.purchaseType = purchaseType;
+	}
+
+	public Integer getEpointsUsed() {
+		return epointsUsed;
+	}
+
+	public void setEpointsUsed(Integer epointsUsed) {
+		this.epointsUsed = epointsUsed;
+	}
+
 }

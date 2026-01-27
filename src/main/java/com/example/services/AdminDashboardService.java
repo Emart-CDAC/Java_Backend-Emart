@@ -42,7 +42,7 @@ public class AdminDashboardService {
 
         // Pending orders
         long pendingOrders = ordersRepository.findAll().stream()
-                .filter(o -> o.getStatus() == com.example.model.OrderStatus.pending)
+                .filter(o -> o.getStatus() == com.example.model.OrderStatus.PENDING)
                 .count();
         stats.put("pendingOrders", pendingOrders);
 

@@ -21,10 +21,9 @@ import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 
-
 @Service
 public class PaymentServiceImpl implements PaymentService {
-	
+
 	@Value("${razorpay.key.id}")
 	private String keyId;
 
@@ -33,9 +32,9 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Autowired
 	private PaymentRepository paymentRepository;
-	
+
 	@Autowired
-	private OrdersRepository ordersRepository; 
+	private OrdersRepository ordersRepository;
 
 	@Override
 	public Payment processPayment(Payment payment) {
@@ -74,99 +73,103 @@ public class PaymentServiceImpl implements PaymentService {
 		return payment.getPaymentMethod();
 	}
 
-	
-	//--------------------------------razorPay---------------------------------------
-	
+	// --------------------------------razorPay---------------------------------------
+
 	@Override
 	public String createRazorpayOrder(int orderId) throws RazorpayException {
 
+		Orders order = ordersRepository.findById(orderId)
+				.orElseThrow(() -> new RuntimeException("Order not found"));
 
-		 Orders order = ordersRepository.findById(orderId)
-		            .orElseThrow(() -> new RuntimeException("Order not found"));
+		double amount = order.getTotalAmount().doubleValue(); // ✅ use actual order amount
 
-		    double amount = order.getTotalAmount().doubleValue(); // ✅ use actual order amount
-		    
-	    RazorpayClient razorpayClient = new RazorpayClient(keyId, keySecret);
+		RazorpayClient razorpayClient = new RazorpayClient(keyId, keySecret);
 
-	    JSONObject orderRequest = new JSONObject();
-	    orderRequest.put("amount", (int)(amount * 100)); // rupees->paise
-	    orderRequest.put("currency", "INR");
-	    orderRequest.put("receipt", "receipt_" + orderId);
+		JSONObject orderRequest = new JSONObject();
+		orderRequest.put("amount", (int) (amount * 100)); // rupees->paise
+		orderRequest.put("currency", "INR");
+		orderRequest.put("receipt", "receipt_" + orderId);
 
-	    Order razorOrder = razorpayClient.orders.create(orderRequest);
+		Order razorOrder = razorpayClient.orders.create(orderRequest);
 
-	    // 2) Save Payment record as PENDING
-	    Payment payment = new Payment();
-	    payment.setAmount(amount);
-	    payment.setPaymentDate(LocalDateTime.now());
-	    payment.setStatus(PaymentStatus.PENDING);
-	    payment.setPaymentMethod(PaymentMethod.RAZORPAY);
+		// 2) Save Payment record as PENDING
+		Payment payment = new Payment();
+		payment.setAmount(amount);
+		payment.setPaymentDate(LocalDateTime.now());
+		payment.setStatus(PaymentStatus.PENDING);
+		payment.setPaymentMethod(PaymentMethod.RAZORPAY);
 
-	    payment.setRazorpayOrderId(razorOrder.get("id"));
-	    
-	    // ✅ THIS LINE IS IMPORTANT (attach order)
-	    payment.setOrder(order);
-	    
-	    paymentRepository.save(payment);
+		payment.setRazorpayOrderId(razorOrder.get("id"));
 
-	    return razorOrder.toString();
+		// ✅ THIS LINE IS IMPORTANT (attach order)
+		payment.setOrder(order);
+
+		paymentRepository.save(payment);
+
+		return razorOrder.toString();
 	}
 
-	
-	
+	@Override
+	public String createRazorpayOrder(double amount) throws RazorpayException {
+		RazorpayClient razorpayClient = new RazorpayClient(keyId, keySecret);
+		JSONObject orderRequest = new JSONObject();
+		orderRequest.put("amount", (int) (amount * 100)); // rupees->paise
+		orderRequest.put("currency", "INR");
+		orderRequest.put("receipt", "receipt_txn_" + System.currentTimeMillis());
+
+		Order razorOrder = razorpayClient.orders.create(orderRequest);
+		return razorOrder.toString();
+	}
+
 	@Override
 	public Payment verifyRazorpayPayment(int orderId, Payment payment) throws Exception {
 
-	    Payment dbPayment = paymentRepository.findByOrder_OrderId(orderId);
+		Payment dbPayment = paymentRepository.findByOrder_OrderId(orderId);
 
-	    if (dbPayment == null) {
-	        throw new RuntimeException("Payment record not found for order");
-	    }
+		if (dbPayment == null) {
+			throw new RuntimeException("Payment record not found for order");
+		}
 
-	    String data = payment.getRazorpayOrderId() + "|" + payment.getRazorpayPaymentId();
-	    String generatedSignature = hmacSha256(data, keySecret);
+		String data = payment.getRazorpayOrderId() + "|" + payment.getRazorpayPaymentId();
+		String generatedSignature = hmacSha256(data, keySecret);
 
-	    if (generatedSignature.equals(payment.getRazorpaySignature())) {
+		if (generatedSignature.equals(payment.getRazorpaySignature())) {
 
-	        dbPayment.setStatus(PaymentStatus.PAID);
-	        dbPayment.setTransactionId(payment.getRazorpayPaymentId());
+			dbPayment.setStatus(PaymentStatus.PAID);
+			dbPayment.setTransactionId(payment.getRazorpayPaymentId());
 
-	        dbPayment.setRazorpayPaymentId(payment.getRazorpayPaymentId());
-	        dbPayment.setRazorpaySignature(payment.getRazorpaySignature());
+			dbPayment.setRazorpayPaymentId(payment.getRazorpayPaymentId());
+			dbPayment.setRazorpaySignature(payment.getRazorpaySignature());
 
-	        return paymentRepository.save(dbPayment);
+			return paymentRepository.save(dbPayment);
 
-	    } else {
-	        dbPayment.setStatus(PaymentStatus.FAILED);
-	        return paymentRepository.save(dbPayment);
-	    }
+		} else {
+			dbPayment.setStatus(PaymentStatus.FAILED);
+			return paymentRepository.save(dbPayment);
+		}
 	}
-	
+
 	@Override
 	public Payment createCashOnDeliveryPayment(int orderId) {
 
-	    Orders order = ordersRepository.findById(orderId)
-	            .orElseThrow(() -> new RuntimeException("Order not found"));
+		Orders order = ordersRepository.findById(orderId)
+				.orElseThrow(() -> new RuntimeException("Order not found"));
 
-	    Payment payment = new Payment();
-	    payment.setOrder(order);
-	    payment.setAmount(order.getTotalAmount().doubleValue());
-	    payment.setPaymentDate(LocalDateTime.now());
-	    payment.setPaymentMethod(PaymentMethod.CASH);
-	    payment.setStatus(PaymentStatus.PENDING);  // ✅ COD pending
+		Payment payment = new Payment();
+		payment.setOrder(order);
+		payment.setAmount(order.getTotalAmount().doubleValue());
+		payment.setPaymentDate(LocalDateTime.now());
+		payment.setPaymentMethod(PaymentMethod.CASH);
+		payment.setStatus(PaymentStatus.PENDING); // ✅ COD pending
 
-	    return paymentRepository.save(payment);
+		return paymentRepository.save(payment);
 	}
 
 	private String hmacSha256(String data, String secret) throws Exception {
-	    Mac sha256Hmac = Mac.getInstance("HmacSHA256");
-	    SecretKeySpec secretKey = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
-	    sha256Hmac.init(secretKey);
-	    return Hex.encodeHexString(sha256Hmac.doFinal(data.getBytes()));
+		Mac sha256Hmac = Mac.getInstance("HmacSHA256");
+		SecretKeySpec secretKey = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
+		sha256Hmac.init(secretKey);
+		return Hex.encodeHexString(sha256Hmac.doFinal(data.getBytes()));
 	}
 
-
-
-	
-	
 }

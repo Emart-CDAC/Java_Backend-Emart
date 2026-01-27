@@ -21,15 +21,13 @@ public class EmailServiceImpl implements EmailService {
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper =
-                    new MimeMessageHelper(message, true);
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
             helper.setTo(toEmail);
             helper.setSubject("Invoice");
             helper.setText("Please find your invoice attached.");
 
-            ByteArrayDataSource dataSource =
-                    new ByteArrayDataSource(pdfBytes, "application/pdf");
+            ByteArrayDataSource dataSource = new ByteArrayDataSource(pdfBytes, "application/pdf");
 
             helper.addAttachment("invoice.pdf", dataSource);
 
@@ -37,6 +35,23 @@ public class EmailServiceImpl implements EmailService {
 
         } catch (Exception e) {
             throw new RuntimeException("Mail sending failed", e);
+        }
+    }
+
+    @Override
+    public void sendEmail(String toInfo, String subject, String body) {
+        try {
+            org.springframework.mail.SimpleMailMessage mail = new org.springframework.mail.SimpleMailMessage();
+            mail.setTo(toInfo);
+            mail.setSubject(subject);
+            mail.setText(body);
+
+            System.out.println("📧 Sending email to: " + toInfo);
+            mailSender.send(mail);
+            System.out.println("✅ Email sent successfully.");
+        } catch (Exception e) {
+            System.err.println("❌ Error sending email: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

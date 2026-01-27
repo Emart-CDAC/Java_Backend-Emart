@@ -9,10 +9,11 @@ public class Address {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "Address_Id")
-	private int addressId;
-	
+	private Long addressId;
+
 	@ManyToOne
 	@JoinColumn(name = "User_id")
+	@com.fasterxml.jackson.annotation.JsonIgnore
 	private Customer customer;
 
 	@Column(name = "Town", nullable = true)
@@ -36,11 +37,11 @@ public class Address {
 	@Column(name = "HouseNumber")
 	private String houseNumber;
 
-	public int getAddressId() {
+	public Long getAddressId() {
 		return addressId;
 	}
 
-	public void setAddressId(int addressId) {
+	public void setAddressId(Long addressId) {
 		this.addressId = addressId;
 	}
 
