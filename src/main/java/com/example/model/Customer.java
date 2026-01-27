@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "Customer")
-public class Customer implements UserDetails{
+public class Customer implements UserDetails {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +32,7 @@ public class Customer implements UserDetails{
 
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "Address_Id")
+	@com.fasterxml.jackson.annotation.JsonIgnore
 	private Address address;
 
 	@Column(name = "Epoints")
@@ -39,6 +40,7 @@ public class Customer implements UserDetails{
 
 	@ManyToOne
 	@JoinColumn(name = "CardHolder_id")
+	@com.fasterxml.jackson.annotation.JsonIgnore
 	private EmartCard emartCard;
 
 	@Column(name = "BirthDate")
@@ -50,27 +52,26 @@ public class Customer implements UserDetails{
 	@Column(name = "Promotional_Email")
 	private boolean promotionalEmail;
 
-    @Column(name = "Membership_Number", unique = true)
-    private String membershipNumber;
-    
-    @Column(name="role")
-    private String role = "USER";
-    
-    @Enumerated(EnumType.STRING)
-    @Column(name = "Auth_Provider", nullable = false)
-    private AuthProvider authProvider;
-    
-    @Column(name = "Profile_Completed")
-    private Boolean profileCompleted; // Changed to Boolean wrapper to handle null
-    
-    public String getRole() {
+	@Column(name = "Membership_Number", unique = true)
+	private String membershipNumber;
+
+	@Column(name = "role")
+	private String role = "USER";
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "Auth_Provider", nullable = false)
+	private AuthProvider authProvider;
+
+	@Column(name = "Profile_Completed")
+	private Boolean profileCompleted; // Changed to Boolean wrapper to handle null
+
+	public String getRole() {
 		return role;
 	}
 
 	public void setRole(String role) {
 		this.role = role;
 	}
-	
 
 	public Boolean isProfileCompleted() {
 		return profileCompleted != null ? profileCompleted : false;
@@ -176,11 +177,26 @@ public class Customer implements UserDetails{
 		this.membershipNumber = membershipNumber;
 	}
 
-    @Override public boolean isAccountNonExpired() { return true; }
-    @Override public boolean isAccountNonLocked() { return true; }
-    @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return true; }
-	
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
+
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return Collections.singletonList(() -> "ROLE_" + this.role);
@@ -190,8 +206,7 @@ public class Customer implements UserDetails{
 	public String getUsername() {
 		return this.email;
 	}
-	
-	
+
 	public AuthProvider getAuthProvider() {
 		return authProvider;
 	}

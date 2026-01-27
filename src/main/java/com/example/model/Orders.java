@@ -8,45 +8,80 @@ import java.time.LocalDateTime;
 @Table(name = "Orders")
 public class Orders {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Order_id")
-    private int orderId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "Order_id")
+	private int orderId;
 
-    @ManyToOne
-    @JoinColumn(name = "User_id")
-    private Customer customer;
+	@ManyToOne
+	@JoinColumn(name = "User_id")
+	@com.fasterxml.jackson.annotation.JsonIgnoreProperties({ "address", "emartCard", "authorities", "password" })
+	private Customer customer;
 
-    @ManyToOne
-    @JoinColumn(name = "Cart_id")
-    private Cart cart;
+	@ManyToOne
+	@JoinColumn(name = "Cart_id")
+	@com.fasterxml.jackson.annotation.JsonIgnore
+	private Cart cart;
+	@ManyToOne
+	@JoinColumn(name = "store_id")
+	private Store store;
 
-    @Column(name = "Order_Date")
-    private LocalDateTime orderDate;
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private java.util.List<OrderItems> orderItems;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "Status")
-    private OrderStatus status;
+	public java.util.List<OrderItems> getOrderItems() {
+		return orderItems;
+	}
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "Payment_Status")
-    private PaymentStatus paymentStatus;
+	public void setOrderItems(java.util.List<OrderItems> orderItems) {
+		this.orderItems = orderItems;
+	}
 
-    @Column(name = "Total_Amount")
-    private BigDecimal totalAmount;
+	public Store getStore() {
+		return store;
+	}
 
-    @Enumerated(EnumType.STRING)
-    private DeliveryType deliveryType;
+	public void setStore(Store store) {
+		this.store = store;
+	}
 
-    @Column(name = "epoints_used")
-    private int epointsUsed;
+	@Column(name = "Order_Date")
+	private LocalDateTime orderDate;
 
-    @ManyToOne
-    @JoinColumn(name = "Address_id")
-    private Address address;
+	@Column(name = "Status")
+	private OrderStatus status;
 
-    @Column(name = "epoints_earned")
-    private int epointsEarned;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "Payment_Status")
+	private PaymentStatus paymentStatus;
+
+	@Column(name = "Total_Amount")
+	private BigDecimal totalAmount;
+
+	@Enumerated(EnumType.STRING)
+	private DeliveryType deliveryType;
+
+	@Column(name = "epoints_used")
+	private int epointsUsed;
+
+	@ManyToOne
+	@JoinColumn(name = "Address_id")
+	private Address address;
+
+	@Column(name = "epoints_earned")
+	private int epointsEarned;
+
+	public PaymentMethod getPaymentMethod() {
+		return paymentMethod;
+	}
+
+	public void setPaymentMethod(PaymentMethod paymentMethod) {
+		this.paymentMethod = paymentMethod;
+	}
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "Payment_Method")
+	private PaymentMethod paymentMethod;
 
 	public int getOrderId() {
 		return orderId;
@@ -136,5 +171,4 @@ public class Orders {
 		this.epointsEarned = epointsEarned;
 	}
 
-    
 }

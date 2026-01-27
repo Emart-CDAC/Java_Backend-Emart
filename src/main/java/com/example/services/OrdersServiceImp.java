@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 
 import java.util.List;
 
+import com.example.dto.PlaceOrderRequest;
 import com.example.model.*;
 import com.example.repository.*;
 
@@ -18,24 +19,42 @@ public class OrdersServiceImp implements OrdersService {
 
     @Autowired
     private OrdersRepository ordersRepository;
-
     @Autowired
     private CustomerRepository customerRepository;
-
     @Autowired
     private CartRepository cartRepository;
-
     @Autowired
     private CartItemRepository cartItemRepository;
-
     @Autowired
     private OrderItemRepository orderItemRepository;
+    @Autowired
+    private AddressRepository addressRepository;
+    @Autowired
+    private StoreRepository storeRepository;
+    @Autowired
+    private EmailService emailService;
 
     @Override
     @Transactional
-    public Orders placeOrder(int userId, String deliveryType, String addressStr) {
+    public Orders placeOrder(PlaceOrderRequest req) {
+        try {
+            return placeOrderInternal(req);
+        } catch (Exception e) {
+            try {
+                java.io.FileWriter fw = new java.io.FileWriter("backend_error.log", true);
+                java.io.PrintWriter pw = new java.io.PrintWriter(fw);
+                e.printStackTrace(pw);
+                pw.close();
+                fw.close();
+            } catch (Exception io) {
+            }
+            throw e;
+        }
+    }
 
-        Customer customer = customerRepository.findById(userId)
+    private Orders placeOrderInternal(PlaceOrderRequest req) {
+
+        Customer customer = customerRepository.findById(req.getUserId())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         Cart cart = cartRepository.findByCustomer(customer)
@@ -46,57 +65,82 @@ public class OrdersServiceImp implements OrdersService {
             throw new RuntimeException("Cart is empty");
         }
 
-        int usedEpoints = cart.getUsedEpoints();
-        int earnedEpoints = cart.getEarnedEpoints();
-
-        // ✅ Validate customer balance
-        if (usedEpoints > customer.getEpoints()) {
+        if (cart.getUsedEpoints() > customer.getEpoints()) {
             throw new RuntimeException("Insufficient e-points");
         }
 
-        // ✅ Create Order
         Orders order = new Orders();
         order.setCustomer(customer);
+        order.setCart(cart);
         order.setOrderDate(LocalDateTime.now());
+        order.setDeliveryType(req.getDeliveryType());
+        order.setPaymentMethod(req.getPaymentMethod());
         order.setTotalAmount(BigDecimal.valueOf(cart.getFinalPayableAmount()));
-        order.setEpointsUsed(usedEpoints);
-        order.setEpointsEarned(earnedEpoints);
-        order.setStatus(OrderStatus.pending);
-        order.setPaymentStatus(PaymentStatus.PAID);
+        order.setEpointsUsed(cart.getUsedEpoints());
+        order.setEpointsEarned(cart.getEarnedEpoints());
+        order.setStatus(OrderStatus.CONFIRMED); // Case-insensitive handled by Converter now
 
-        order.setDeliveryType(
-                "pickup".equalsIgnoreCase(deliveryType)
-                        ? DeliveryType.STORE
-                        : DeliveryType.HOME_DELIVERY);
+        // DELIVERY
+        if (req.getDeliveryType() == DeliveryType.HOME_DELIVERY) {
+            Address address = addressRepository.findById(req.getAddressId())
+                    .orElseThrow(() -> new RuntimeException("Address not found"));
+            order.setAddress(address);
+        } else {
+            Store store = storeRepository.findById(req.getStoreId())
+                    .orElseThrow(() -> new RuntimeException("Store not found"));
+            order.setStore(store);
+        }
 
-        order.setAddress(customer.getAddress());
+        // PAYMENT
+        order.setPaymentStatus(
+                req.getPaymentMethod() == PaymentMethod.CASH
+                        ? PaymentStatus.PENDING
+                        : PaymentStatus.PAID);
 
         Orders savedOrder = ordersRepository.save(order);
 
-        // ✅ Convert CartItems → OrderItems
-        for (CartItems item : cartItems) {
-            OrderItems orderItem = new OrderItems();
-            orderItem.setOrder(savedOrder);
-            orderItem.setProduct(item.getProduct());
-            orderItem.setQuantity(item.getQuantity());
-            orderItem.setPrice(item.getProduct().getNormalPrice());
-            orderItem.setSubtotal(item.getSubtotal());
-            orderItemRepository.save(orderItem);
+        // CART → ORDER ITEMS
+        for (CartItems ci : cartItems) {
+            OrderItems oi = new OrderItems();
+            oi.setOrder(savedOrder);
+            oi.setProduct(ci.getProduct());
+            oi.setQuantity(ci.getQuantity());
+            oi.setPrice(ci.getProduct().getNormalPrice());
+            oi.setSubtotal(ci.getSubtotal());
+            orderItemRepository.save(oi);
         }
 
-        // ✅ Update customer e-points
+        // UPDATE EPOINTS
         customer.setEpoints(
-                customer.getEpoints() - usedEpoints + earnedEpoints);
+                customer.getEpoints()
+                        - cart.getUsedEpoints()
+                        + cart.getEarnedEpoints());
         customerRepository.save(customer);
 
-        // ✅ Clear cart
-        cartItemRepository.deleteAll(cartItems);
-        cart.setTotalAmount(0);
+        // CLEAR CART
+        cartItemRepository.deleteByCart_CartId(cart.getCartId());
         cart.setTotalMrp(0);
-        cart.setEpointDiscount(0);
+        cart.setFinalPayableAmount(0);
         cart.setUsedEpoints(0);
+        cart.setEpointDiscount(0);
         cart.setEarnedEpoints(0);
         cartRepository.save(cart);
+
+        // SEND EMAIL
+        try {
+            String subject = "Order Confirmation - Order #" + savedOrder.getOrderId();
+            String body = "Dear " + customer.getFullName() + ",\n\n" +
+                    "Thank you for shopping with e-MART!\n" +
+                    "Your order has been placed successfully.\n\n" +
+                    "Order ID: " + savedOrder.getOrderId() + "\n" +
+                    "Amount Paid: ₹" + savedOrder.getTotalAmount() + "\n" +
+                    "Payment Method: " + savedOrder.getPaymentMethod() + "\n\n" +
+                    "We hope to see you again soon!\n\ne-MART Team";
+            emailService.sendEmail(customer.getEmail(), subject, body);
+        } catch (Exception e) {
+            System.err.println("⚠️ Failed to send email: " + e.getMessage());
+            // Don't fail the order if email fails
+        }
 
         return savedOrder;
     }
@@ -114,4 +158,15 @@ public class OrdersServiceImp implements OrdersService {
         return ordersRepository.findByCustomerUserId(userId);
     }
 
+    @Override
+    @Transactional
+    public Orders getOrderById(int orderId) {
+        Orders order = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        // Initialize lazy collection
+        if (order.getOrderItems() != null) {
+            order.getOrderItems().size();
+        }
+        return order;
+    }
 }

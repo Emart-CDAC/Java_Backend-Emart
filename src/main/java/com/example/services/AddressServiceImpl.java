@@ -9,6 +9,7 @@ import com.example.repository.CustomerRepository;
 import com.example.services.AddressService;
 
 import java.util.List;
+
 @Service
 public class AddressServiceImpl implements AddressService {
 
@@ -16,7 +17,7 @@ public class AddressServiceImpl implements AddressService {
     private final CustomerRepository customerRepository;
 
     public AddressServiceImpl(AddressRepository addressRepository,
-                              CustomerRepository customerRepository) {
+            CustomerRepository customerRepository) {
         this.addressRepository = addressRepository;
         this.customerRepository = customerRepository;
     }
@@ -50,12 +51,12 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public List<Address> getAddressesByCustomer(Long customerId) {
+    public List<Address> getAddressesByCustomer(Integer customerId) {
         return addressRepository.findByCustomerUserId(customerId);
     }
 
     @Override
-    public Address getUserAddress(Long userId) {
+    public Address getUserAddress(Integer userId) {
         List<Address> addresses = addressRepository.findByCustomerUserId(userId);
         if (addresses.isEmpty()) {
             throw new RuntimeException("No address found");

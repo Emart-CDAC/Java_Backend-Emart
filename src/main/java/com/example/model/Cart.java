@@ -14,6 +14,7 @@ public class Cart {
 
 	@ManyToOne
 	@JoinColumn(name = "User_Id")
+	@com.fasterxml.jackson.annotation.JsonIgnore
 	private Customer customer;
 
 	@Column(name = "Total_Amount")

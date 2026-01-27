@@ -224,9 +224,16 @@ public class CartServiceImpl implements CartService {
 	}
 
 	@Override
+	@Transactional
 	public void removeFromCart(int cartItemId) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'removeFromCart'");
+		CartItems item = cartItemRepository.findById(cartItemId)
+				.orElseThrow(() -> new RuntimeException("Cart item not found"));
+
+		Cart cart = item.getCart();
+		cartItemRepository.delete(item);
+
+		// 🔹 Recalculate totals after removal
+		recalculateCartPricing(cart);
 	}
 
 	@Override

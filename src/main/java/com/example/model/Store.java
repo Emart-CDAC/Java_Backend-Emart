@@ -6,32 +6,31 @@ import jakarta.persistence.*;
 @Table(name = "Store")
 public class Store {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Store_id")
-    private int storeId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "Store_id")
+	private Long storeId;
 
-    @Column(name = "Store_Name", nullable = false)
-    private String storeName;
+	@Column(name = "Store_Name", nullable = false)
+	private String storeName;
 
-    @Column(name = "City", nullable = false)
-    private String city;
+	@Column(name = "City", nullable = false)
+	private String city;
 
-    @Column(name = "Address", nullable = false)
-    private String address;
+	@Column(name = "Address", nullable = false)
+	private String address;
 
-    
 	@Column(name = "Contact_Number", nullable = false)
-    private String contactNumber;
+	private String contactNumber;
 
-    @Column(name = "Availability")
-    private boolean availability;
+	@Column(name = "Availability")
+	private boolean availability;
 
-    public int getStoreId() {
+	public Long getStoreId() {
 		return storeId;
 	}
 
-	public void setStoreId(int storeId) {
+	public void setStoreId(Long storeId) {
 		this.storeId = storeId;
 	}
 
