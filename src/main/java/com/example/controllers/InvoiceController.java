@@ -25,83 +25,72 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("/api/invoice")
 public class InvoiceController {
 
-    @Autowired
-    private InvoiceService invoiceService;
+        @Autowired
+        private InvoiceService invoiceService;
 
-    @Autowired
-    private InvoiceRepository invoiceRepo;
+        @Autowired
+        private InvoiceRepository invoiceRepo;
 
-    @Autowired
-    private OrderItemRepository orderItemsRepo;
+        @Autowired
+        private OrderItemRepository orderItemsRepo;
 
-    @Autowired
-    private EmailService emailService;
+        @Autowired
+        private EmailService emailService;
 
-   
-    @PostMapping("/generate/{orderId}")
-    public ResponseEntity<Invoice> generateInvoice(@PathVariable int orderId) {
-        return ResponseEntity.ok(invoiceService.addInvoice(orderId));
-    }
-
-   
-    @GetMapping("/view/{invoiceId}")
-    public ResponseEntity<Invoice> viewInvoiceById(@PathVariable int invoiceId) {
-        return invoiceService.findById(invoiceId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-  
-    @GetMapping("/mail/latest")
-    public ResponseEntity<String> mailLatestInvoice() {
-
-        Invoice invoice = invoiceRepo.findTopByOrderByInvoiceIdDesc();
-        if (invoice == null) {
-            return ResponseEntity.badRequest().body("No invoice");
+        @PostMapping("/generate/{orderId}")
+        public ResponseEntity<Invoice> generateInvoice(@PathVariable int orderId) {
+                return ResponseEntity.ok(invoiceService.addInvoice(orderId));
         }
 
-        List<OrderItems> items =
-                orderItemsRepo.findByOrder_OrderId(
-                        invoice.getOrder().getOrderId()
-                );
+        @GetMapping("/view/{invoiceId}")
+        public ResponseEntity<Invoice> viewInvoiceById(@PathVariable int invoiceId) {
+                return invoiceService.findById(invoiceId)
+                                .map(ResponseEntity::ok)
+                                .orElse(ResponseEntity.notFound().build());
+        }
 
-        InvoicePDFExporter exporter =
-                new InvoicePDFExporter(invoice, items);
+        @GetMapping("/mail/latest")
+        public ResponseEntity<String> mailLatestInvoice() {
 
-        byte[] pdf = exporter.generatePdfBytes();
+                Invoice invoice = invoiceRepo.findTopByOrderByInvoiceIdDesc();
+                if (invoice == null) {
+                        return ResponseEntity.badRequest().body("No invoice");
+                }
 
-        emailService.sendPdf(
-                invoice.getCustomer().getEmail(),
-                pdf
-        );
+                List<OrderItems> items = orderItemsRepo.findByOrder_OrderId(
+                                invoice.getOrder().getOrderId());
 
-        return ResponseEntity.ok("Invoice mailed");
-    }
+                InvoicePDFExporter exporter = new InvoicePDFExporter(invoice, items);
 
- 
-    @GetMapping("/export/pdf/{invoiceId}")
-    public void exportInvoicePdf(
-            @PathVariable int invoiceId,
-            HttpServletResponse response
-    ) throws IOException, DocumentException {
+                byte[] pdf = exporter.generatePdfBytes();
 
-        Invoice invoice = invoiceService.findById(invoiceId)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+                emailService.sendPdf(
+                                invoice.getCustomer().getEmail(),
+                                "Invoice Copy",
+                                "Please find your invoice attached.",
+                                pdf);
 
-        List<OrderItems> items =
-                orderItemsRepo.findByOrder_OrderId(
-                        invoice.getOrder().getOrderId()
-                );
+                return ResponseEntity.ok("Invoice mailed");
+        }
 
-        response.setContentType("application/pdf");
-        response.setHeader(
-                "Content-Disposition",
-                "inline; filename=invoice_" + invoiceId + ".pdf"
-        );
+        @GetMapping("/export/pdf/{invoiceId}")
+        public void exportInvoicePdf(
+                        @PathVariable int invoiceId,
+                        HttpServletResponse response) throws IOException, DocumentException {
 
-        InvoicePDFExporter exporter =
-                new InvoicePDFExporter(invoice, items);
+                Invoice invoice = invoiceService.findById(invoiceId)
+                                .orElseThrow(() -> new RuntimeException("Invoice not found"));
 
-        exporter.export(response);
-    }
+                List<OrderItems> items = orderItemsRepo.findByOrder_OrderId(
+                                invoice.getOrder().getOrderId());
+
+                response.setContentType("application/pdf");
+                response.setHeader(
+                                "Content-Disposition",
+                                "inline; filename=invoice_" + invoiceId + ".pdf");
+
+                InvoicePDFExporter exporter = new InvoicePDFExporter(invoice, items);
+
+                exporter.export(response);
+        }
 }

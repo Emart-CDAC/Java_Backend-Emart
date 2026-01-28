@@ -23,10 +23,10 @@ public class OrderItems {
     private int quantity;
 
     @Column(name = "price")
-    private double price;
+    private java.math.BigDecimal price;
 
     @Column(name = "subtotal")
-    private double subtotal;
+    private java.math.BigDecimal subtotal;
 
     // getters & setters
     public int getOrderItemId() {
@@ -61,19 +61,19 @@ public class OrderItems {
         this.quantity = quantity;
     }
 
-    public double getPrice() {
+    public java.math.BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(java.math.BigDecimal price) {
         this.price = price;
     }
 
-    public double getSubtotal() {
+    public java.math.BigDecimal getSubtotal() {
         return subtotal;
     }
 
-    public void setSubtotal(double subtotal) {
+    public void setSubtotal(java.math.BigDecimal subtotal) {
         this.subtotal = subtotal;
     }
 }

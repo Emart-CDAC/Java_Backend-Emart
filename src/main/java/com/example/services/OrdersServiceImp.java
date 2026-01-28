@@ -77,7 +77,7 @@ public class OrdersServiceImp implements OrdersService {
         order.setOrderDate(LocalDateTime.now());
         order.setDeliveryType(req.getDeliveryType());
         order.setPaymentMethod(req.getPaymentMethod());
-        order.setTotalAmount(BigDecimal.valueOf(cart.getFinalPayableAmount()));
+        order.setTotalAmount(cart.getFinalPayableAmount());
         order.setEpointsUsed(cart.getUsedEpoints());
         order.setEpointsEarned(cart.getEarnedEpoints());
         order.setStatus(OrderStatus.CONFIRMED); // Case-insensitive handled by Converter now
@@ -102,6 +102,7 @@ public class OrdersServiceImp implements OrdersService {
         Orders savedOrder = ordersRepository.save(order);
 
         // CART → ORDER ITEMS
+        List<OrderItems> orderItemsList = new java.util.ArrayList<>();
         for (CartItems ci : cartItems) {
             OrderItems oi = new OrderItems();
             oi.setOrder(savedOrder);
@@ -110,7 +111,11 @@ public class OrdersServiceImp implements OrdersService {
             oi.setPrice(ci.getProduct().getNormalPrice());
             oi.setSubtotal(ci.getSubtotal());
             orderItemRepository.save(oi);
+
+            // Add to list for PDF generation
+            orderItemsList.add(oi);
         }
+        savedOrder.setOrderItems(orderItemsList);
 
         // UPDATE EPOINTS
         customer.setEpoints(
@@ -121,10 +126,10 @@ public class OrdersServiceImp implements OrdersService {
 
         // CLEAR CART
         cartItemRepository.deleteByCart_CartId(cart.getCartId());
-        cart.setTotalMrp(0);
-        cart.setFinalPayableAmount(0);
+        cart.setTotalMrp(BigDecimal.ZERO);
+        cart.setFinalPayableAmount(BigDecimal.ZERO);
         cart.setUsedEpoints(0);
-        cart.setEpointDiscount(0);
+        cart.setEpointDiscount(BigDecimal.ZERO);
         cart.setEarnedEpoints(0);
         cartRepository.save(cart);
 
@@ -144,22 +149,24 @@ public class OrdersServiceImp implements OrdersService {
 
         // SEND EMAIL WITH PDF
         try {
+            // Construct Email Body
+            String subject = "Order Confirmation - Order #" + savedOrder.getOrderId();
+            String body = "Dear " + customer.getFullName() + ",\n\n" +
+                    "Thank you for shopping with e-MART!\n" +
+                    "Your order has been placed successfully.\n\n" +
+                    "Order ID: " + savedOrder.getOrderId() + "\n" +
+                    "Amount Paid: Rs." + savedOrder.getTotalAmount() + "\n\n" +
+                    "Please find your invoice attached (if generated).\n\n" +
+                    "e-MART Team";
+
             // Generate PDF
-            // Assuming we autowired invoiceService (Need to add field first)
             byte[] pdfBytes = invoiceService.generateInvoicePdf(savedOrder);
 
             if (pdfBytes != null) {
-                emailService.sendPdf(customer.getEmail(), pdfBytes);
+                emailService.sendPdf(customer.getEmail(), subject, body, pdfBytes);
                 System.out.println("✅ Invoice PDF sent to: " + customer.getEmail());
             } else {
-                // Fallback to simple email
-                String subject = "Order Confirmation - Order #" + savedOrder.getOrderId();
-                String body = "Dear " + customer.getFullName() + ",\n\n" +
-                        "Thank you for shopping with e-MART!\n" +
-                        "Your order has been placed successfully.\n\n" +
-                        "Order ID: " + savedOrder.getOrderId() + "\n" +
-                        "Amount Paid: Rs." + savedOrder.getTotalAmount() + "\n\n" +
-                        "Please find your invoice attached (if generated).\n\ne-MART Team";
+                // Fallback to simple email (same body)
                 emailService.sendEmail(customer.getEmail(), subject, body);
             }
 

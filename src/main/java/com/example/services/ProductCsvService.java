@@ -45,7 +45,7 @@ public class ProductCsvService {
                     Product product = new Product();
                     product.setName(data[0].trim());
                     product.setDescription(data[1].trim());
-                    product.setNormalPrice(Double.parseDouble(data[2].trim()));
+                    product.setNormalPrice(new java.math.BigDecimal(data[2].trim()));
                     product.setAvailableQuantity(Integer.parseInt(data[3].trim()));
                     product.setImageUrl(data[5].trim());
                     product.setStoreId(1);

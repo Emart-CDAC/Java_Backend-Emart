@@ -4,15 +4,15 @@ import java.util.List;
 
 public class CartResponseDTO {
 	private List<CartItemDTO> items;
-	private double totalAmount;
+	private java.math.BigDecimal totalAmount;
 	private int totalEPointsUsed;
 
 	// Pricing breakdown
-	private double totalMrp;
-	private double epointDiscount;
-	private double couponDiscount;
-	private double platformFee;
-	private double finalPayableAmount;
+	private java.math.BigDecimal totalMrp;
+	private java.math.BigDecimal epointDiscount;
+	private java.math.BigDecimal couponDiscount;
+	private java.math.BigDecimal platformFee;
+	private java.math.BigDecimal finalPayableAmount;
 	private int usedEpoints;
 	private int earnedEpoints;
 	private int availableEpoints; // User's total balance
@@ -25,11 +25,11 @@ public class CartResponseDTO {
 		this.items = items;
 	}
 
-	public double getTotalAmount() {
+	public java.math.BigDecimal getTotalAmount() {
 		return totalAmount;
 	}
 
-	public void setTotalAmount(double totalAmount) {
+	public void setTotalAmount(java.math.BigDecimal totalAmount) {
 		this.totalAmount = totalAmount;
 	}
 
@@ -41,43 +41,43 @@ public class CartResponseDTO {
 		this.totalEPointsUsed = totalEPointsUsed;
 	}
 
-	public double getTotalMrp() {
+	public java.math.BigDecimal getTotalMrp() {
 		return totalMrp;
 	}
 
-	public void setTotalMrp(double totalMrp) {
+	public void setTotalMrp(java.math.BigDecimal totalMrp) {
 		this.totalMrp = totalMrp;
 	}
 
-	public double getEpointDiscount() {
+	public java.math.BigDecimal getEpointDiscount() {
 		return epointDiscount;
 	}
 
-	public void setEpointDiscount(double epointDiscount) {
+	public void setEpointDiscount(java.math.BigDecimal epointDiscount) {
 		this.epointDiscount = epointDiscount;
 	}
 
-	public double getCouponDiscount() {
+	public java.math.BigDecimal getCouponDiscount() {
 		return couponDiscount;
 	}
 
-	public void setCouponDiscount(double couponDiscount) {
+	public void setCouponDiscount(java.math.BigDecimal couponDiscount) {
 		this.couponDiscount = couponDiscount;
 	}
 
-	public double getPlatformFee() {
+	public java.math.BigDecimal getPlatformFee() {
 		return platformFee;
 	}
 
-	public void setPlatformFee(double platformFee) {
+	public void setPlatformFee(java.math.BigDecimal platformFee) {
 		this.platformFee = platformFee;
 	}
 
-	public double getFinalPayableAmount() {
+	public java.math.BigDecimal getFinalPayableAmount() {
 		return finalPayableAmount;
 	}
 
-	public void setFinalPayableAmount(double finalPayableAmount) {
+	public void setFinalPayableAmount(java.math.BigDecimal finalPayableAmount) {
 		this.finalPayableAmount = finalPayableAmount;
 	}
 
@@ -105,4 +105,22 @@ public class CartResponseDTO {
 		this.availableEpoints = availableEpoints;
 	}
 
+	private java.math.BigDecimal gstAmount;
+	private java.math.BigDecimal offerDiscount;
+
+	public java.math.BigDecimal getGstAmount() {
+		return gstAmount;
+	}
+
+	public void setGstAmount(java.math.BigDecimal gstAmount) {
+		this.gstAmount = gstAmount;
+	}
+
+	public java.math.BigDecimal getOfferDiscount() {
+		return offerDiscount;
+	}
+
+	public void setOfferDiscount(java.math.BigDecimal offerDiscount) {
+		this.offerDiscount = offerDiscount;
+	}
 }

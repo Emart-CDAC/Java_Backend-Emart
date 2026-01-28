@@ -5,8 +5,8 @@ public class CartItemDTO {
 	private int productId;
 	private String productName;
 	private int quantity;
-	private double price;
-	private double discountedPrice;
+	private java.math.BigDecimal price;
+	private java.math.BigDecimal discountedPrice;
 	private String purchaseType;
 	private int epointsUsed;
 	private String imageUrl;
@@ -43,19 +43,19 @@ public class CartItemDTO {
 		this.quantity = quantity;
 	}
 
-	public double getPrice() {
+	public java.math.BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(java.math.BigDecimal price) {
 		this.price = price;
 	}
 
-	public double getDiscountedPrice() {
+	public java.math.BigDecimal getDiscountedPrice() {
 		return discountedPrice;
 	}
 
-	public void setDiscountedPrice(double discountedPrice) {
+	public void setDiscountedPrice(java.math.BigDecimal discountedPrice) {
 		this.discountedPrice = discountedPrice;
 	}
 

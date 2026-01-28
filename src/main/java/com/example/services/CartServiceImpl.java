@@ -1,5 +1,7 @@
 package com.example.services;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,8 +28,8 @@ public class CartServiceImpl implements CartService {
 	@Autowired
 	private ProductRepository productRepository;
 
-	private static final double PLATFORM_FEE = 23.0;
-	private static final double EPOINT_TO_RUPEE = 1.0;
+	private static final BigDecimal PLATFORM_FEE = new BigDecimal("23.00");
+	private static final BigDecimal EPOINT_TO_RUPEE = new BigDecimal("1.00");
 
 	// ============================
 	// ADD TO CART
@@ -53,14 +55,14 @@ public class CartServiceImpl implements CartService {
 		Cart cart = cartRepository.findByCustomer(customer).orElseGet(() -> {
 			Cart c = new Cart();
 			c.setCustomer(customer);
-			c.setTotalMrp(0.0);
-			c.setCouponDiscount(0.0);
-			c.setPlatformFee(0.0);
+			c.setTotalMrp(BigDecimal.ZERO);
+			c.setCouponDiscount(BigDecimal.ZERO);
+			c.setPlatformFee(BigDecimal.ZERO);
 			c.setUsedEpoints(0);
-			c.setEpointDiscount(0.0);
+			c.setEpointDiscount(BigDecimal.ZERO);
 			c.setEarnedEpoints(0);
-			c.setFinalPayableAmount(0.0);
-			c.setTotalAmount(0.0);
+			c.setFinalPayableAmount(BigDecimal.ZERO);
+			c.setTotalAmount(BigDecimal.ZERO);
 			return cartRepository.save(c);
 		});
 
@@ -71,7 +73,7 @@ public class CartServiceImpl implements CartService {
 				.findByCartAndProduct(cart, product)
 				.orElseGet(() -> {
 					CartItems ci = new CartItems();
-					ci.setEpointsUsed(0); // 🔥 VERY IMPORTANT
+					ci.setEpointsUsed(0);
 					return ci;
 				});
 
@@ -82,8 +84,24 @@ public class CartServiceImpl implements CartService {
 		int finalEpointsUsed = 0;
 		String finalPurchaseType = purchaseType == null ? "NORMAL" : purchaseType;
 
+		// Use Normal Price for E-points redemption calculation as per existing logic
+		// (or should it be effective price?
+		// "ALL calculations must use discounted price if discount_percent > 0".
+		// Assuming redemption is also based on effective price to be consistent, but
+		// usually points redeem against MRP.
+		// However, "ALL calculations must use discounted price" implies this too.
+		// Let's stick to getEffectivePrice() for consistency).
+		// Wait, user said "Normal price should NEVER be used for rewards". Rewards
+		// usually means earning.
+		// For spending/redemption, if I have 50% discount, price is half.
+		// If I select "FULL_EP", I should pay effective price in points.
+		BigDecimal effectivePrice = product.getEffectivePrice();
+
 		if ("FULL_EP".equals(finalPurchaseType)) {
-			finalEpointsUsed = (int) (product.getNormalPrice() * finalQuantity);
+			// finalEpointsUsed = (int) (product.getNormalPrice() * finalQuantity);
+			// Using effective price for redemption cost too
+			finalEpointsUsed = effectivePrice.multiply(BigDecimal.valueOf(finalQuantity)).intValue();
+
 			if (finalEpointsUsed > availablePoints) {
 				throw new RuntimeException("Insufficient e-points. Available: " + availablePoints);
 			}
@@ -100,7 +118,7 @@ public class CartServiceImpl implements CartService {
 		item.setPurchaseType(finalPurchaseType);
 		item.setEpointsUsed(finalEpointsUsed);
 
-		double subtotal = product.getNormalPrice() * finalQuantity;
+		BigDecimal subtotal = effectivePrice.multiply(BigDecimal.valueOf(finalQuantity));
 		item.setSubtotal(subtotal);
 		item.setTotalPrice(subtotal);
 
@@ -117,11 +135,13 @@ public class CartServiceImpl implements CartService {
 
 		List<CartItems> items = cartItemRepository.findByCart(cart);
 
-		double totalMrp = 0.0;
+		BigDecimal totalMrp = BigDecimal.ZERO;
 		int totalEpointsUsed = 0;
 
 		for (CartItems item : items) {
-			totalMrp += item.getProduct().getNormalPrice() * item.getQuantity();
+			// Use effective price for total calculation
+			BigDecimal itemPrice = item.getProduct().getEffectivePrice();
+			totalMrp = totalMrp.add(itemPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
 
 			Integer used = item.getEpointsUsed();
 			totalEpointsUsed += (used == null ? 0 : used);
@@ -129,32 +149,39 @@ public class CartServiceImpl implements CartService {
 
 		cart.setTotalMrp(totalMrp);
 
-		double platformFee = items.isEmpty() ? 0.0 : PLATFORM_FEE;
+		BigDecimal platformFee = items.isEmpty() ? BigDecimal.ZERO : PLATFORM_FEE;
 		cart.setPlatformFee(platformFee);
 
-		double epointDiscount = totalEpointsUsed * EPOINT_TO_RUPEE;
-		if (epointDiscount > totalMrp) {
+		BigDecimal epointDiscount = BigDecimal.valueOf(totalEpointsUsed).multiply(EPOINT_TO_RUPEE);
+		if (epointDiscount.compareTo(totalMrp) > 0) {
 			epointDiscount = totalMrp;
 		}
 
 		cart.setUsedEpoints(totalEpointsUsed);
 		cart.setEpointDiscount(epointDiscount);
 
-		Double coupon = cart.getCouponDiscount();
-		double couponDiscount = coupon == null ? 0.0 : coupon;
+		BigDecimal coupon = cart.getCouponDiscount();
+		BigDecimal couponDiscount = coupon == null ? BigDecimal.ZERO : coupon;
 
-		double finalAmount = totalMrp - epointDiscount - couponDiscount + platformFee;
-		if (finalAmount < 0)
-			finalAmount = 0;
+		// finalAmount = totalMrp - epointDiscount - couponDiscount + platformFee
+		BigDecimal finalAmount = totalMrp.subtract(epointDiscount).subtract(couponDiscount).add(platformFee);
+		if (finalAmount.compareTo(BigDecimal.ZERO) < 0)
+			finalAmount = BigDecimal.ZERO;
 
-		cart.setFinalPayableAmount(finalAmount);
-		cart.setTotalAmount(finalAmount);
+		// Calculate GST (10%)
+		BigDecimal gstAmount = finalAmount.multiply(new BigDecimal("0.10"));
+		BigDecimal finalPayableWithGst = finalAmount.add(gstAmount);
 
-		double cashPaid = totalMrp - epointDiscount - couponDiscount;
-		if (cashPaid < 0)
-			cashPaid = 0;
+		cart.setFinalPayableAmount(finalPayableWithGst);
+		cart.setTotalAmount(finalPayableWithGst);
 
-		cart.setEarnedEpoints((int) (cashPaid * 0.10));
+		// cashPaid = totalMrp - epointDiscount - couponDiscount
+		BigDecimal cashPaid = totalMrp.subtract(epointDiscount).subtract(couponDiscount);
+		if (cashPaid.compareTo(BigDecimal.ZERO) < 0)
+			cashPaid = BigDecimal.ZERO;
+
+		// ePoints = cashPaid * 0.10
+		cart.setEarnedEpoints(cashPaid.multiply(new BigDecimal("0.10")).intValue());
 
 		cartRepository.save(cart);
 	}
@@ -171,14 +198,14 @@ public class CartServiceImpl implements CartService {
 		Cart cart = cartRepository.findByCustomer(customer).orElseGet(() -> {
 			Cart c = new Cart();
 			c.setCustomer(customer);
-			c.setTotalMrp(0.0);
-			c.setCouponDiscount(0.0);
-			c.setPlatformFee(0.0);
+			c.setTotalMrp(BigDecimal.ZERO);
+			c.setCouponDiscount(BigDecimal.ZERO);
+			c.setPlatformFee(BigDecimal.ZERO);
 			c.setUsedEpoints(0);
-			c.setEpointDiscount(0.0);
+			c.setEpointDiscount(BigDecimal.ZERO);
 			c.setEarnedEpoints(0);
-			c.setFinalPayableAmount(0.0);
-			c.setTotalAmount(0.0);
+			c.setFinalPayableAmount(BigDecimal.ZERO);
+			c.setTotalAmount(BigDecimal.ZERO);
 			return cartRepository.save(c);
 		});
 
@@ -193,6 +220,9 @@ public class CartServiceImpl implements CartService {
 
 		CartResponseDTO dto = new CartResponseDTO();
 
+		// Calculate Real Total MRP (Sum of Normal Prices)
+		BigDecimal realTotalMrp = BigDecimal.ZERO;
+
 		List<CartItemDTO> items = cartItemRepository.findByCart(cart)
 				.stream()
 				.map(item -> {
@@ -201,21 +231,45 @@ public class CartServiceImpl implements CartService {
 					d.setProductId(item.getProduct().getId());
 					d.setProductName(item.getProduct().getName());
 					d.setQuantity(item.getQuantity());
-					d.setPrice(item.getProduct().getNormalPrice());
-					d.setDiscountedPrice(item.getTotalPrice());
+					d.setPrice(item.getProduct().getNormalPrice()); // Regular price
+					// Use effective price for discounted price
+					d.setDiscountedPrice(item.getProduct().getEffectivePrice());
 					d.setPurchaseType(item.getPurchaseType());
 					d.setEpointsUsed(item.getEpointsUsed() == null ? 0 : item.getEpointsUsed());
 					d.setImageUrl(item.getProduct().getImageUrl());
 					return d;
 				}).collect(Collectors.toList());
 
+		// Re-iterate (or could have done in stream, but stream is map) to get total
+		// Real MRP
+		for (CartItems item : cartItemRepository.findByCart(cart)) {
+			realTotalMrp = realTotalMrp
+					.add(item.getProduct().getNormalPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+		}
+
 		dto.setItems(items);
-		dto.setTotalMrp(cart.getTotalMrp());
+
+		// Set Real MRP in DTO
+		dto.setTotalMrp(realTotalMrp);
+
+		// Offer Discount = Real MRP - Effective MRP (which is stored in cart.totalMrp)
+		dto.setOfferDiscount(realTotalMrp.subtract(cart.getTotalMrp()));
+
 		dto.setEpointDiscount(cart.getEpointDiscount());
-		dto.setCouponDiscount(cart.getCouponDiscount() == null ? 0.0 : cart.getCouponDiscount());
+		dto.setCouponDiscount(cart.getCouponDiscount() == null ? BigDecimal.ZERO : cart.getCouponDiscount());
 		dto.setPlatformFee(cart.getPlatformFee());
+
 		dto.setFinalPayableAmount(cart.getFinalPayableAmount());
 		dto.setTotalAmount(cart.getFinalPayableAmount());
+
+		// Reverse calculate GST or just calculate from Pre-GST base
+		// Since we just calculated it in recalculateCartPricing: GST = Payable -
+		// (Payable / 1.1) roughly,
+		// but cleaner to calculate from implied Pre-GST amount.
+		// Pre-GST = Payable / 1.1
+		BigDecimal preGstAmount = cart.getFinalPayableAmount().divide(new BigDecimal("1.1"), 2, RoundingMode.HALF_UP);
+		dto.setGstAmount(cart.getFinalPayableAmount().subtract(preGstAmount));
+
 		dto.setUsedEpoints(cart.getUsedEpoints());
 		dto.setEarnedEpoints(cart.getEarnedEpoints());
 		dto.setAvailableEpoints(customer.getEpoints());
@@ -254,8 +308,10 @@ public class CartServiceImpl implements CartService {
 			item.setEpointsUsed(0);
 		}
 
+		BigDecimal effectivePrice = item.getProduct().getEffectivePrice();
+
 		if ("FULL_EP".equals(item.getPurchaseType())) {
-			int required = (int) (item.getProduct().getNormalPrice() * quantity);
+			int required = effectivePrice.multiply(BigDecimal.valueOf(quantity)).intValue();
 			item.setEpointsUsed(required);
 		}
 
@@ -264,7 +320,7 @@ public class CartServiceImpl implements CartService {
 			item.setEpointsUsed(used != null ? used : 0);
 		}
 
-		double subtotal = item.getProduct().getNormalPrice() * quantity;
+		BigDecimal subtotal = effectivePrice.multiply(BigDecimal.valueOf(quantity));
 		item.setSubtotal(subtotal);
 		item.setTotalPrice(subtotal);
 
@@ -303,14 +359,14 @@ public class CartServiceImpl implements CartService {
 		cartItemRepository.deleteByCart_CartId(cart.getCartId());
 
 		// 🔹 Reset cart totals safely
-		cart.setTotalMrp(0);
-		cart.setCouponDiscount(0.0);
-		cart.setPlatformFee(0);
+		cart.setTotalMrp(BigDecimal.ZERO);
+		cart.setCouponDiscount(BigDecimal.ZERO);
+		cart.setPlatformFee(BigDecimal.ZERO);
 		cart.setUsedEpoints(0);
-		cart.setEpointDiscount(0);
+		cart.setEpointDiscount(BigDecimal.ZERO);
 		cart.setEarnedEpoints(0);
-		cart.setFinalPayableAmount(0);
-		cart.setTotalAmount(0);
+		cart.setFinalPayableAmount(BigDecimal.ZERO);
+		cart.setTotalAmount(BigDecimal.ZERO);
 
 		cartRepository.save(cart);
 	}

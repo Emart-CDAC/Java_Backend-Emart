@@ -24,10 +24,10 @@ public class CartItems {
 	private int quantity;
 
 	@Column(name = "Subtotal")
-	private double subtotal;
+	private BigDecimal subtotal;
 
 	@Column(name = "Total_Price")
-	private double totalPrice;
+	private BigDecimal totalPrice;
 
 	@Column(name = "Purchase_Type")
 	private String purchaseType; // "NORMAL", "PARTIAL_EP", "FULL_EP"
@@ -67,19 +67,19 @@ public class CartItems {
 		this.quantity = quantity;
 	}
 
-	public double getSubtotal() {
+	public BigDecimal getSubtotal() {
 		return subtotal;
 	}
 
-	public void setSubtotal(double subtotal) {
+	public void setSubtotal(BigDecimal subtotal) {
 		this.subtotal = subtotal;
 	}
 
-	public double getTotalPrice() {
+	public BigDecimal getTotalPrice() {
 		return totalPrice;
 	}
 
-	public void setTotalPrice(double totalPrice) {
+	public void setTotalPrice(BigDecimal totalPrice) {
 		this.totalPrice = totalPrice;
 	}
 
