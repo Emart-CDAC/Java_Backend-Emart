@@ -32,7 +32,6 @@ public class Customer implements UserDetails {
 
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "Address_Id")
-	@com.fasterxml.jackson.annotation.JsonIgnore
 	private Address address;
 
 	@Column(name = "Epoints")

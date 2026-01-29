@@ -11,7 +11,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import com.example.model.Customer;
-import com.example.services.OAuthUserService;
+import com.example.services.UserService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,11 +19,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
-    private final OAuthUserService oauthUserService;
+    private final UserService userService;
     private final JwtUtil jwtUtil;
 
-    public OAuthSuccessHandler(OAuthUserService oauthUserService, JwtUtil jwtUtil) {
-        this.oauthUserService = oauthUserService;
+    public OAuthSuccessHandler(UserService userService, JwtUtil jwtUtil) {
+        this.userService = userService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -35,26 +35,27 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         String email = user.getAttribute("email");
         String name = user.getAttribute("name");
 
-        Customer existingUser = oauthUserService.findByEmail(email);
+        try {
+            Customer customer = userService.processGoogleLogin(email, name);
 
-        if (existingUser != null) {
-            if (existingUser.getAuthProvider() == com.example.model.AuthProvider.LOCAL) {
-                // Provider mismatch: Email exists as LOCAL
-                response.sendRedirect("http://localhost:5173/login?error=" +
-                        URLEncoder.encode("This email is registered with a password. Please login normally.",
-                                StandardCharsets.UTF_8));
-                return;
+            if (customer.isProfileCompleted()) {
+                // Login directly
+                String token = jwtUtil.generateToken(email, "ROLE_USER", customer.getUserId());
+                response.sendRedirect("http://localhost:5173/login?token=" + token);
+            } else {
+                // Redirect to Register to complete profile
+                // Pass isOAuth=true so frontend knows to enable "Complete Profile" mode
+                String targetUrl = "http://localhost:5173/register?email=" +
+                        URLEncoder.encode(email, StandardCharsets.UTF_8) +
+                        "&name=" + URLEncoder.encode(name, StandardCharsets.UTF_8) +
+                        "&isOAuth=true";
+                response.sendRedirect(targetUrl);
             }
 
-            // Existing GOOGLE user: Login directly
-            String token = jwtUtil.generateToken(email, "ROLE_USER", existingUser.getUserId());
-            response.sendRedirect("http://localhost:5173/login?token=" + token);
-        } else {
-            // New Google User: Create entry (now includes default profile/address) and
-            // login directly
-            com.example.model.Customer newUser = oauthUserService.saveCustomer(user);
-            String token = jwtUtil.generateToken(email, "ROLE_USER", newUser.getUserId());
-            response.sendRedirect("http://localhost:5173/login?token=" + token);
+        } catch (RuntimeException e) {
+            // Error (e.g. Registered as Local User)
+            response.sendRedirect("http://localhost:5173/login?error=" +
+                    URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8));
         }
     }
 

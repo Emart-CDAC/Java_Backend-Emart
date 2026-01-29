@@ -34,6 +34,9 @@ public class OrdersServiceImp implements OrdersService {
     @Autowired
     private EmailService emailService;
     @Autowired
+    private PaymentService paymentService;
+
+    @Autowired
     private InvoiceService invoiceService;
 
     @Override
@@ -124,6 +127,22 @@ public class OrdersServiceImp implements OrdersService {
                         + cart.getEarnedEpoints());
         customerRepository.save(customer);
 
+        // GENERATE INVOICE ENTITY (Must be before clearing cart)
+        try {
+            invoiceService.addInvoice(savedOrder.getOrderId());
+        } catch (Exception e) {
+            System.err.println("Failed to create invoice entity: " + e.getMessage());
+        }
+
+        // GENERATE PAYMENT ENTITY (For COD)
+        if (req.getPaymentMethod() == PaymentMethod.CASH) {
+            try {
+                paymentService.createCashOnDeliveryPayment(savedOrder.getOrderId());
+            } catch (Exception e) {
+                System.err.println("Failed to create COD payment: " + e.getMessage());
+            }
+        }
+
         // CLEAR CART
         cartItemRepository.deleteByCart_CartId(cart.getCartId());
         cart.setTotalMrp(BigDecimal.ZERO);
@@ -132,20 +151,6 @@ public class OrdersServiceImp implements OrdersService {
         cart.setEpointDiscount(BigDecimal.ZERO);
         cart.setEarnedEpoints(0);
         cartRepository.save(cart);
-
-        // GENERATE INVOICE ENTITY
-        try {
-            // We need to inject InvoiceService here or use a bean if circular dependency
-            // allows.
-            // Usually InvoiceService depends on OrderService (for lookup), but here
-            // OrderService depends on InvoiceService (for creation).
-            // Circular dependency risk: OrderService -> InvoiceService -> OrderService.
-            // InvoiceServiceImp injects OrdersRepository, not OrdersService, so it should
-            // be fine.
-            // We need to AutoWire InvoiceService.
-        } catch (Exception e) {
-            System.err.println("Failed to create invoice entity: " + e.getMessage());
-        }
 
         // SEND EMAIL WITH PDF
         try {

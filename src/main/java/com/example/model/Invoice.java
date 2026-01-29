@@ -15,7 +15,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "invoice")
+@Table(name = "customer_invoice")
 public class Invoice {
 
 	@Id
@@ -32,10 +32,6 @@ public class Invoice {
 
 	@Column(name = "order_date")
 	private LocalDateTime orderDate;
-
-	@OneToOne
-	@JoinColumn(name = "order_id", referencedColumnName = "order_id", insertable = false, updatable = false)
-	private Payment payment;
 
 	private java.math.BigDecimal discountAmount;
 	private java.math.BigDecimal taxAmount;
@@ -81,14 +77,6 @@ public class Invoice {
 
 	public void setOrderDate(LocalDateTime orderDate) {
 		this.orderDate = orderDate;
-	}
-
-	public Payment getPayment() {
-		return payment;
-	}
-
-	public void setPayment(Payment payment) {
-		this.payment = payment;
 	}
 
 	public java.math.BigDecimal getDiscountAmount() {

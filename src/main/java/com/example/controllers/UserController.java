@@ -42,8 +42,15 @@ public class UserController {
 
     // ===================== NORMAL REGISTER =====================
     @PostMapping("/register")
-    public Customer registerUser(@RequestBody Customer customer) {
-        return userService.registerUser(customer);
+    public ResponseEntity<TokenResponse> registerUser(@RequestBody Customer customer) {
+        Customer savedCustomer = userService.registerUser(customer);
+
+        String token = jwtUtil.generateToken(
+                savedCustomer.getEmail(),
+                "ROLE_USER",
+                savedCustomer.getUserId());
+
+        return ResponseEntity.ok(new TokenResponse(token));
     }
 
     // ===================== GOOGLE SSO CALLBACK =====================

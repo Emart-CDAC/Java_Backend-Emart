@@ -43,8 +43,28 @@ public class UserServiceImpl implements UserService {
 
         Optional<Customer> existing = customerRepository.findByEmail(customer.getEmail());
         if (existing.isPresent()) {
-            if (existing.get().getAuthProvider() == AuthProvider.GOOGLE) {
-                throw new RuntimeException("This email is already registered via Google SSO");
+            Customer exist = existing.get();
+            // Allow update if it's an existing Google user completing profile
+            if (exist.getAuthProvider() == AuthProvider.GOOGLE) {
+                // We assume the frontend passed AuthProvider.GOOGLE or we infer it?
+                // Currently Register.jsx passes data. We should check if we are allowed to
+                // update.
+                // If profile is NOT completed, we allow update.
+                if (!exist.isProfileCompleted()) {
+                    exist.setFullName(customer.getFullName());
+                    exist.setMobile(customer.getMobile());
+                    // Note: Address is separate entity usually mapped via customer.setAddress
+
+                    if (customer.getAddress() != null) {
+                        customer.getAddress().setCustomer(exist);
+                        exist.setAddress(customer.getAddress());
+                    }
+
+                    exist.setProfileCompleted(true);
+                    return customerRepository.save(exist);
+                } else {
+                    throw new RuntimeException("This email is already registered via Google SSO");
+                }
             } else {
                 throw new RuntimeException("This email is already registered. Please login.");
             }
