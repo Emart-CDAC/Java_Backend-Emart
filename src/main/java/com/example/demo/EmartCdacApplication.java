@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.example.config.SSLConfig;
+
 @SpringBootApplication
 @ComponentScan(basePackages = { "com.example" })
 @EnableJpaRepositories(basePackages = "com.example.repository")
@@ -15,8 +17,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @EnableAsync
 public class EmartCdacApplication {
 
-    public static void main(String[] args) {
-        System.out.println(new BCryptPasswordEncoder().encode("admin123"));
-        SpringApplication.run(EmartCdacApplication.class, args);
-    }
+	public static void main(String[] args) {
+		SSLConfig.disableSSLVerification();
+		System.out.println(new BCryptPasswordEncoder().encode("admin123"));
+		SpringApplication.run(EmartCdacApplication.class, args);
+	}
 }
