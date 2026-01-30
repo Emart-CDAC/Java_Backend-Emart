@@ -49,7 +49,43 @@ public class AdminDashboardService {
         return stats;
     }
 
-    public Page<Orders> getAllOrders(int page, int size) {
-        return ordersRepository.findAll(PageRequest.of(page, size));
+    public Page<com.example.dto.OrderResponseDTO> getAllOrders(int page, int size) {
+        Page<Orders> ordersPage = ordersRepository.findAll(PageRequest.of(page, size));
+        return ordersPage.map(this::convertToDTO);
+    }
+
+    private com.example.dto.OrderResponseDTO convertToDTO(Orders order) {
+        com.example.dto.OrderResponseDTO dto = new com.example.dto.OrderResponseDTO();
+        dto.setOrderId(order.getOrderId());
+        dto.setOrderDate(order.getOrderDate());
+        dto.setStatus(order.getStatus() != null ? order.getStatus().name() : null);
+        dto.setPaymentStatus(order.getPaymentStatus() != null ? order.getPaymentStatus().name() : null);
+        dto.setPaymentMethod(order.getPaymentMethod() != null ? order.getPaymentMethod().name() : null);
+        dto.setDeliveryType(order.getDeliveryType() != null ? order.getDeliveryType().name() : null);
+        dto.setTotalAmount(order.getTotalAmount());
+        dto.setEpointsUsed(order.getEpointsUsed());
+        dto.setEpointsEarned(order.getEpointsEarned());
+
+        if (order.getCustomer() != null) {
+            dto.setCustomerId(order.getCustomer().getUserId());
+            dto.setCustomerName(order.getCustomer().getFullName());
+            dto.setCustomerEmail(order.getCustomer().getEmail());
+        }
+
+        if (order.getAddress() != null) {
+            dto.setAddressId(order.getAddress().getAddressId());
+            dto.setAddressLine(order.getAddress().getHouseNumber() + ", " + order.getAddress().getTown());
+            dto.setCity(order.getAddress().getCity());
+            dto.setState(order.getAddress().getState());
+            dto.setPincode(order.getAddress().getPincode());
+        }
+
+        // Note: Intentionally avoiding lazy lazy loading of orderItems here if not
+        // strictly needed
+        // to prevent another LazyInitializationException. If items are needed, they
+        // should be fetched transactionally.
+        // For the dashboard list view, items are usually not required.
+
+        return dto;
     }
 }

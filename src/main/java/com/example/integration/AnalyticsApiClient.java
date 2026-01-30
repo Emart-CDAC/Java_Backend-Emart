@@ -21,8 +21,13 @@ public class AnalyticsApiClient {
 	private static final String BASE_URL = "http://localhost:5169/api/reports";
 
 	public List<ProductOfferInventoryDTO> getProductOffersInventory() {
-		return Arrays.asList(
-				restTemplate.getForObject(BASE_URL + "/product-offers-inventory", ProductOfferInventoryDTO[].class));
+		try {
+			return Arrays.asList(restTemplate.getForObject(BASE_URL + "/product-offers-inventory",
+					ProductOfferInventoryDTO[].class));
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException("Failed to connect to .NET backend: " + e.getMessage());
+		}
 	}
 
 	// public List<DailySalesDTO> getDailySales() {
