@@ -18,21 +18,25 @@ public class AnalyticsApiClient {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	private static final String BASE_URL = "https://localhost:7226/api/reports";
+	private static final String BASE_URL = "http://localhost:5169/api/reports";
 
 	public List<ProductOfferInventoryDTO> getProductOffersInventory() {
-		return Arrays.asList(restTemplate.getForObject(BASE_URL + "/product-offers-inventory", ProductOfferInventoryDTO[].class));
+		return Arrays.asList(
+				restTemplate.getForObject(BASE_URL + "/product-offers-inventory", ProductOfferInventoryDTO[].class));
 	}
 
-//	public List<DailySalesDTO> getDailySales() {
-//		return Arrays.asList(restTemplate.getForObject(BASE_URL + "/daily-sales", DailySalesDTO[].class));
-//	}
-//
-//	public List<WeeklyRevenueDTO> getWeeklyRevenue() {
-//		return Arrays.asList(restTemplate.getForObject(BASE_URL + "/weekly-revenue", WeeklyRevenueDTO[].class));
-//	}
-//
-//	public List<LoyaltyProductDTO> getLoyaltyProducts() {
-//		return Arrays.asList(restTemplate.getForObject(BASE_URL + "/loyalty-products", LoyaltyProductDTO[].class));
-//	}
+	// public List<DailySalesDTO> getDailySales() {
+	// return Arrays.asList(restTemplate.getForObject(BASE_URL + "/daily-sales",
+	// DailySalesDTO[].class));
+	// }
+	//
+	// public List<WeeklyRevenueDTO> getWeeklyRevenue() {
+	// return Arrays.asList(restTemplate.getForObject(BASE_URL + "/weekly-revenue",
+	// WeeklyRevenueDTO[].class));
+	// }
+	//
+	// public List<LoyaltyProductDTO> getLoyaltyProducts() {
+	// return Arrays.asList(restTemplate.getForObject(BASE_URL +
+	// "/loyalty-products", LoyaltyProductDTO[].class));
+	// }
 }

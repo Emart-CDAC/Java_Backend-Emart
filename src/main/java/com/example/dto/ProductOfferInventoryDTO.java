@@ -1,8 +1,13 @@
 package com.example.dto;
 
 public class ProductOfferInventoryDTO {
+	@com.fasterxml.jackson.annotation.JsonProperty("product_Name")
 	private String product_Name;
+
+	@com.fasterxml.jackson.annotation.JsonProperty("discount_Offer")
 	private String discount_Offer;
+
+	@com.fasterxml.jackson.annotation.JsonProperty("quantity")
 	private int quantity;
 
 	public String getProduct_Name() {
