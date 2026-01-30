@@ -11,6 +11,7 @@ import com.example.model.Orders;
 import com.example.model.PaymentMethod;
 import com.example.repository.InvoiceRepository;
 import com.example.repository.OrdersRepository;
+import com.lowagie.text.Paragraph;
 
 @Service
 public class InvoiceServiceImp implements InvoiceService {
@@ -93,15 +94,15 @@ public class InvoiceServiceImp implements InvoiceService {
 			com.lowagie.text.Paragraph title = new com.lowagie.text.Paragraph("INVOICE", fontTitle);
 			title.setAlignment(com.lowagie.text.Paragraph.ALIGN_CENTER);
 			document.add(title);
-			document.add(new com.lowagie.text.Paragraph(" ")); // Spacer
+			document.add(new Paragraph(" ")); // Spacer
 
 			com.lowagie.text.Font fontHeader = com.lowagie.text.FontFactory
 					.getFont(com.lowagie.text.FontFactory.HELVETICA_BOLD);
-			document.add(new com.lowagie.text.Paragraph("Order ID: " + order.getOrderId(), fontHeader));
-			document.add(new com.lowagie.text.Paragraph("Date: " + order.getOrderDate()));
-			document.add(new com.lowagie.text.Paragraph("Customer: " + order.getCustomer().getFullName()));
-			document.add(new com.lowagie.text.Paragraph("Email: " + order.getCustomer().getEmail()));
-			document.add(new com.lowagie.text.Paragraph("Payment Method: " + order.getPaymentMethod()));
+			document.add(new Paragraph("Order ID: " + order.getOrderId(), fontHeader));
+			document.add(new Paragraph("Date: " + order.getOrderDate()));
+			document.add(new Paragraph("Customer: " + order.getCustomer().getFullName()));
+			document.add(new Paragraph("Email: " + order.getCustomer().getEmail()));
+			document.add(new Paragraph("Payment Method: " + order.getPaymentMethod()));
 
 			// if (order.getAddress() != null) {
 			// document.add(new com.lowagie.text.Paragraph("Shipping Address: " +

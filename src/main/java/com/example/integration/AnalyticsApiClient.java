@@ -30,18 +30,4 @@ public class AnalyticsApiClient {
 		}
 	}
 
-	// public List<DailySalesDTO> getDailySales() {
-	// return Arrays.asList(restTemplate.getForObject(BASE_URL + "/daily-sales",
-	// DailySalesDTO[].class));
-	// }
-	//
-	// public List<WeeklyRevenueDTO> getWeeklyRevenue() {
-	// return Arrays.asList(restTemplate.getForObject(BASE_URL + "/weekly-revenue",
-	// WeeklyRevenueDTO[].class));
-	// }
-	//
-	// public List<LoyaltyProductDTO> getLoyaltyProducts() {
-	// return Arrays.asList(restTemplate.getForObject(BASE_URL +
-	// "/loyalty-products", LoyaltyProductDTO[].class));
-	// }
 }
