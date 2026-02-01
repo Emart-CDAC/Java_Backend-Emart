@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.model.Orders;
 import com.example.model.Payment;
@@ -121,33 +122,84 @@ public class PaymentServiceImpl implements PaymentService {
 		return razorOrder.toString();
 	}
 
-	@Override
-	public Payment verifyRazorpayPayment(int orderId, Payment payment) throws Exception {
-
-		Payment dbPayment = paymentRepository.findByOrder_OrderId(orderId);
-
-		if (dbPayment == null) {
-			throw new RuntimeException("Payment record not found for order");
-		}
-
-		String data = payment.getRazorpayOrderId() + "|" + payment.getRazorpayPaymentId();
-		String generatedSignature = hmacSha256(data, keySecret);
-
-		if (generatedSignature.equals(payment.getRazorpaySignature())) {
-
-			dbPayment.setStatus(PaymentStatus.PAID);
-			dbPayment.setTransactionId(payment.getRazorpayPaymentId());
-
-			dbPayment.setRazorpayPaymentId(payment.getRazorpayPaymentId());
-			dbPayment.setRazorpaySignature(payment.getRazorpaySignature());
-
-			return paymentRepository.save(dbPayment);
-
-		} else {
-			dbPayment.setStatus(PaymentStatus.FAILED);
-			return paymentRepository.save(dbPayment);
-		}
-	}
+//	@Transactional
+//	@Override
+//	public Payment verifyRazorpayPayment(int orderId, Payment payment) throws Exception {
+//
+//		Payment dbPayment = paymentRepository.findByOrder_OrderId(orderId);
+//
+//		if (dbPayment == null) {
+//			throw new RuntimeException("Payment record not found for order");
+//		}
+//
+//		String data = payment.getRazorpayOrderId() + "|" + payment.getRazorpayPaymentId();
+//		String generatedSignature = hmacSha256(data, keySecret);
+//		
+//		System.out.println("Generated Signature: " + generatedSignature);
+//		System.out.println("Received Signature: " + payment.getRazorpaySignature());
+//
+//
+//		if (generatedSignature.equals(payment.getRazorpaySignature())) {
+//
+//			dbPayment.setStatus(PaymentStatus.PAID);
+//			dbPayment.setTransactionId(payment.getRazorpayPaymentId());
+//
+//			dbPayment.setRazorpayPaymentId(payment.getRazorpayPaymentId());
+//			dbPayment.setRazorpaySignature(payment.getRazorpaySignature());
+//
+//			return paymentRepository.save(dbPayment);
+//
+//		} else {
+//			dbPayment.setStatus(PaymentStatus.FAILED);
+//			return paymentRepository.save(dbPayment);
+//		}
+//	}
+	
+	
+	@Transactional
+    @Override
+    public Payment verifyRazorpayPayment(int orderId, Payment payment) throws Exception {
+        Payment dbPayment = paymentRepository.findByOrder_OrderId(orderId);
+        // ----------------------------------------------------
+        // [MODIFIED] Create Payment record if it doesn't exist
+        // ----------------------------------------------------
+        if (dbPayment == null) {
+            // Fetch the Order to link
+            Orders order = ordersRepository.findById(orderId)
+                    .orElseThrow(() -> new RuntimeException("Order not found for payment verification"));
+            // Create new Payment record
+            dbPayment = new Payment();
+            dbPayment.setOrder(order);
+            dbPayment.setAmount(order.getTotalAmount().doubleValue());
+            dbPayment.setPaymentDate(LocalDateTime.now());
+            dbPayment.setPaymentMethod(PaymentMethod.RAZORPAY);
+            dbPayment.setStatus(PaymentStatus.PENDING);
+            
+            // Save it so we can update it below
+            dbPayment = paymentRepository.save(dbPayment);
+        }
+        // ----------------------------------------------------
+        String data = payment.getRazorpayOrderId() + "|" + payment.getRazorpayPaymentId();
+        String generatedSignature = hmacSha256(data, keySecret);
+        
+        System.out.println("Generated Signature: " + generatedSignature);
+        System.out.println("Received Signature: " + payment.getRazorpaySignature());
+        if (generatedSignature.equals(payment.getRazorpaySignature())) {
+            dbPayment.setStatus(PaymentStatus.PAID);
+            dbPayment.setTransactionId(payment.getRazorpayPaymentId());
+            dbPayment.setRazorpayPaymentId(payment.getRazorpayPaymentId());
+            dbPayment.setRazorpaySignature(payment.getRazorpaySignature());
+            // Also save the orderId from Razorpay if available in input 'payment'
+            dbPayment.setRazorpayOrderId(payment.getRazorpayOrderId()); 
+            return paymentRepository.save(dbPayment);
+        } else {
+            dbPayment.setStatus(PaymentStatus.FAILED);
+            return paymentRepository.save(dbPayment);
+        }
+    }
+	
+	
+	
 
 	@Override
 	public Payment createCashOnDeliveryPayment(int orderId) {

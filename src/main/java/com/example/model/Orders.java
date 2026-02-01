@@ -27,6 +27,7 @@ public class Orders {
 	private Store store;
 
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@com.fasterxml.jackson.annotation.JsonIgnore
 	private java.util.List<OrderItems> orderItems;
 
 	public java.util.List<OrderItems> getOrderItems() {
