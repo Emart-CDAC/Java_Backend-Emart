@@ -1,14 +1,17 @@
 package com.example.services;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.model.Invoice;
 import com.example.model.Orders;
-import com.example.model.PaymentMethod;
+import com.example.repository.CartItemRepository;
+import com.example.repository.CustomerRepository;
 import com.example.repository.InvoiceRepository;
 import com.example.repository.OrdersRepository;
 import com.lowagie.text.Paragraph;
@@ -21,8 +24,12 @@ public class InvoiceServiceImp implements InvoiceService {
 
 	@Autowired
 	private OrdersRepository ordersRepo;
+	
+	@Autowired
+	private CartItemRepository cartItemsRepo;
 
 	@Override
+	@Transactional
 	public Invoice addInvoice(int orderId) {
 
 		Orders order = ordersRepo.findById(orderId)
@@ -33,6 +40,7 @@ public class InvoiceServiceImp implements InvoiceService {
 		invoice.setOrder(order);
 		invoice.setCustomer(order.getCustomer());
 		invoice.setOrderDate(order.getOrderDate());
+		invoice.setDeliveryType(order.getDeliveryType());
 
 		// Logic Update for Pricing
 		com.example.model.Cart cart = order.getCart();
@@ -48,6 +56,13 @@ public class InvoiceServiceImp implements InvoiceService {
 			invoice.setTotalAmount(cart.getFinalPayableAmount());
 			invoice.setEpointsUsed(cart.getUsedEpoints());
 			invoice.setEpointsEarned(cart.getEarnedEpoints());
+			
+			BigDecimal tax = order.getCart().getFinalPayableAmount();
+			float f = (float) (tax.floatValue()*(0.10));
+			
+			BigDecimal b = new BigDecimal(String.valueOf(f));
+			invoice.setTaxAmount(b);
+			
 		} else {
 			// Fallback if cart not present (should generally not happen if Order linked to
 			// Cart)
@@ -56,7 +71,7 @@ public class InvoiceServiceImp implements InvoiceService {
 			invoice.setEpointsUsed(0);
 			invoice.setEpointsEarned(0);
 		}
-		invoice.setEpointsBalance(0);
+		invoice.setEpointsBalance(order.getCustomer().getEpoints());
 
 		if (order.getAddress() != null) {
 			invoice.setBillingAddress(order.getAddress().toString());

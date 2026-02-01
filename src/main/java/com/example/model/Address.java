@@ -109,4 +109,12 @@ public class Address {
 		this.customer = customer;
 	}
 
+	@Override
+	public String toString() {
+		return "Address [addressId=" + addressId + ", customer=" + customer + ", town=" + town + ", state=" + state
+				+ ", country=" + country + ", city=" + city + ", pincode=" + pincode + ", landmark=" + landmark
+				+ ", houseNumber=" + houseNumber + "]";
+	}
+
+	
 }
