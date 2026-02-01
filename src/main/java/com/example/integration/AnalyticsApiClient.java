@@ -18,7 +18,7 @@ public class AnalyticsApiClient {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	private static final String BASE_URL = "http://localhost:5169/api/reports";
+	private static final String BASE_URL = "http://localhost:8081/api/reports";
 
 	public List<ProductOfferInventoryDTO> getProductOffersInventory() {
 		try {
