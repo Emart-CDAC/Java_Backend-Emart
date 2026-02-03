@@ -39,7 +39,6 @@ public class Customer implements UserDetails {
 
 	@ManyToOne
 	@JoinColumn(name = "CardHolder_id")
-	@com.fasterxml.jackson.annotation.JsonIgnore
 	private EmartCard emartCard;
 
 	@Column(name = "BirthDate")
